@@ -1,0 +1,30 @@
+<!-- @dsCard height=288 -->
+<style>
+html,body{margin:0;background:var(--surface-page)}
+svg{display:block;width:960px;height:288px}
+.ground{fill:var(--surface-page)}
+.launch{fill:var(--brand-launch)}
+.flamingo{fill:var(--brand-flamingo)}
+.orbit{fill:var(--brand-orbit)}
+.ink{fill:var(--ink)}
+.slab{rx:28px}
+.blk{rx:20px}
+.name{font-family:var(--font-display);font-weight:800;font-size:64px;letter-spacing:-3px;fill:var(--ink)}
+.tag{font-family:var(--font-body);font-weight:400;font-size:14px;fill:var(--ink-muted)}
+</style>
+<svg viewBox="0 0 960 288" role="img" aria-label="30 Products 30 Days design system cover">
+<!-- Derivation
+blocks: brand-launch slab 264x224 (radius-lg 28), ink block 152x104 and brand-orbit block 152x104 (radius-md 20), brand-flamingo disc r72 over the slab
+arrangement: one tall yellow slab with two stacked satellites on the right, pink disc breaking the slab's left edge
+pattern: discs - README says soft, sticker-like, large radii, so a row of five discs from the pill radius sits along the slab base
+steps and radii: space-4 (24) outer margin, space-3 (16) gap between satellites, radius-lg, radius-md, radius-pill -->
+<rect class="ground" width="960" height="288"/>
+<rect class="launch slab" x="504" y="32" width="264" height="224"/>
+<circle class="flamingo" cx="552" cy="116" r="72"/>
+<rect class="ink blk" x="784" y="32" width="152" height="104"/>
+<rect class="orbit blk" x="784" y="152" width="152" height="104"/>
+<circle class="ink" cx="544" cy="232" r="10"/><circle class="ink" cx="588" cy="232" r="10"/><circle class="ink" cx="632" cy="232" r="10"/><circle class="ink" cx="676" cy="232" r="10"/><circle class="ink" cx="720" cy="232" r="10"/>
+<text class="name" x="48" y="165">30 Products</text>
+<text class="name" x="48" y="226">30 Days</text>
+<text class="tag" x="48" y="256">One product a day, for thirty days.</text>
+</svg>
