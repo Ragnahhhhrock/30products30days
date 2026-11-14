@@ -81,6 +81,35 @@
   .muted{color:var(--ink-muted)}
   .l30-btn{margin-top:var(--space-2)}
   .social-links{display:flex;flex-wrap:wrap;gap:var(--space-2)}
+  /* Registration form (same styles as register.html) */
+  .signup{max-width:640px}
+  #reg{padding:var(--space-4);display:flex;flex-direction:column;gap:var(--space-4)}
+  .field{display:flex;flex-direction:column;gap:6px;border:0;padding:0;margin:0;min-width:0}
+  .field > label,.field > legend{font:700 16px/1.3 var(--font-body);padding:0}
+  .hint{font-weight:400;color:var(--ink-muted);font-size:14px}
+  #reg input[type=text],#reg input[type=email],#reg input[type=url],#reg select,#reg textarea{
+    width:100%;min-height:44px;padding:10px 14px;font:400 16px/1.4 var(--font-body);color:var(--ink);
+    background:var(--surface-card);border:var(--border-w) solid var(--outline);border-radius:var(--radius-sm)}
+  #reg textarea{min-height:100px;resize:vertical}
+  #reg input:focus-visible,#reg select:focus-visible,#reg textarea:focus-visible{outline:3px solid var(--focus-ring);outline-offset:2px}
+  #reg ::placeholder{color:var(--ink-muted);opacity:.8}
+  .opts{display:flex;flex-wrap:wrap;gap:var(--space-2)}
+  .opts label{position:relative;cursor:pointer}
+  .opts input{position:absolute;opacity:0;inset:0;width:100%;height:100%;margin:0;cursor:pointer}
+  .opts span{display:inline-flex;align-items:center;min-height:44px;padding:8px 18px;font:700 15px/1 var(--font-body);
+    border:var(--border-w) dashed var(--outline);border-radius:var(--radius-pill);background:var(--surface-card);color:var(--ink)}
+  .opts input:checked + span{background:var(--status-shipped);color:var(--on-status-shipped);border-style:solid}
+  .opts input:focus-visible + span{outline:3px solid var(--focus-ring);outline-offset:3px}
+  .consent{display:flex;gap:12px;align-items:flex-start}
+  .consent input{width:24px;height:24px;margin:2px 0 0;flex:none;accent-color:var(--brand-orbit)}
+  .consent input:focus-visible{outline:3px solid var(--focus-ring);outline-offset:2px}
+  .status{display:none;padding:14px 16px;border:var(--border-w) solid var(--outline);border-radius:var(--radius-sm);font-weight:700}
+  .status.ok{display:block;background:var(--brand-launch);color:#0F1B3D}
+  .status.err{display:block;background:var(--brand-flamingo);color:#0F1B3D}
+  #reg .l30-btn{width:100%}
+  .hp{position:absolute;left:-9999px;height:0;overflow:hidden}
+  [hidden]{display:none!important}
+  @media (prefers-reduced-motion:reduce){.l30-btn{transition:none}}
   footer{margin-top:var(--space-6);padding:var(--space-5) 0;border-top:var(--border-w) solid var(--outline);color:var(--ink-muted);font-size:14px}
   footer .wrap{display:flex;align-items:center;gap:var(--space-3)}
   footer img{width:32px;height:32px}
@@ -126,7 +155,91 @@
       <a class="l30-btn l30-btn--secondary" href="https://www.instagram.com/30products30days" rel="me noopener">Instagram</a>
       <a class="l30-btn l30-btn--secondary" href="https://www.facebook.com/30products30days" rel="me noopener">Facebook</a>
     </p>
-    <p><a class="l30-btn l30-btn--primary" href="register.html">Join the challenge</a></p>
+  </section>
+
+  <section id="join">
+    <p class="label">Starts 28 Nov 2026</p>
+    <h2>Join the challenge</h2>
+    <p class="muted">One product a day, digital, physical or service. Build your own or follow along.</p>
+    <div class="panel signup">
+      <div class="panel__head panel__head--pink">Sign up</div>
+      <form id="reg" novalidate>
+        <div class="field">
+          <label for="name">Name</label>
+          <input type="text" id="name" name="name" required autocomplete="name">
+        </div>
+
+        <div class="field">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" required autocomplete="email">
+        </div>
+
+        <div class="field">
+          <label for="link">Website or social link <span class="hint">optional</span></label>
+          <input type="url" id="link" name="link" placeholder="https://">
+        </div>
+
+        <div class="field">
+          <label for="location">Country and time zone <span class="hint">optional</span></label>
+          <input type="text" id="location" name="location" placeholder="Australia, Perth">
+        </div>
+
+        <div class="field">
+          <label for="role">How do you want to take part?</label>
+          <select id="role" name="role" required>
+            <option value="">Choose one</option>
+            <option value="builder-full">Build all 30 products</option>
+            <option value="builder-part">Build some products</option>
+            <option value="follower">Follow along</option>
+            <option value="customer">Buy or pre-order products</option>
+            <option value="sponsor">Sponsor or partner</option>
+          </select>
+        </div>
+
+        <div id="builderFields" hidden>
+          <fieldset class="field">
+            <legend>What will you make? <span class="hint">pick any</span></legend>
+            <div class="opts">
+              <label><input type="checkbox" name="types" value="digital"><span>Digital</span></label>
+              <label><input type="checkbox" name="types" value="physical"><span>Physical</span></label>
+              <label><input type="checkbox" name="types" value="service"><span>Service</span></label>
+            </div>
+          </fieldset>
+
+          <div class="field" style="margin-top:var(--space-4)">
+            <label for="plan">What do you plan to build? <span class="hint">a rough idea is fine</span></label>
+            <textarea id="plan" name="plan"></textarea>
+          </div>
+
+          <div class="field" style="margin-top:var(--space-4)">
+            <label for="tools">Tools you will use <span class="hint">optional</span></label>
+            <input type="text" id="tools" name="tools" placeholder="Claude, Cloudflare">
+          </div>
+        </div>
+
+        <fieldset class="field">
+          <legend>Interested in the competition? <span class="hint">highest-rated builder wins the prize pot</span></legend>
+          <div class="opts">
+            <label><input type="radio" name="competition" value="yes"><span>Yes</span></label>
+            <label><input type="radio" name="competition" value="maybe" checked><span>Maybe</span></label>
+            <label><input type="radio" name="competition" value="no"><span>No</span></label>
+          </div>
+        </fieldset>
+
+        <div class="field">
+          <label for="notes">Anything else? <span class="hint">optional</span></label>
+          <textarea id="notes" name="notes"></textarea>
+        </div>
+
+        <label class="consent"><input type="checkbox" id="consent" name="consent" required>
+          <span>Email me challenge updates. I can unsubscribe any time.</span></label>
+
+        <div class="hp" aria-hidden="true"><label>Leave blank <input type="text" name="_gotcha" tabindex="-1" autocomplete="off"></label></div>
+
+        <button type="submit" id="go" class="l30-btn l30-btn--primary">Join the list</button>
+        <div class="status" id="msg" role="status" aria-live="polite"></div>
+      </form>
+    </div>
   </section>
 
   <section>
@@ -161,6 +274,50 @@
     document.getElementById('s').textContent = pad(s%60);
   }
   tick(); setInterval(tick,1000);
+</script>
+<script>
+// Set to a form endpoint that accepts a JSON POST (e.g. Formspree or a Cloudflare Worker).
+// Keep in sync with register.html.
+const FORM_ENDPOINT = "";
+
+const form = document.getElementById("reg");
+const msg = document.getElementById("msg");
+const go = document.getElementById("go");
+const role = document.getElementById("role");
+const builderFields = document.getElementById("builderFields");
+
+role.addEventListener("change", () => { builderFields.hidden = !role.value.startsWith("builder"); });
+
+function show(text, cls){ msg.textContent = text; msg.className = "status " + cls; }
+
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const f = new FormData(form);
+  if (f.get("_gotcha")) return;
+  const name = (f.get("name")||"").trim(), email = (f.get("email")||"").trim();
+  if (!name) return show("Add your name.", "err");
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return show("Add a valid email address.", "err");
+  if (!f.get("role")) return show("Choose how you want to take part.", "err");
+  if (!document.getElementById("consent").checked) return show("Tick the email box to join.", "err");
+  if (!FORM_ENDPOINT) return show("Sign-ups open soon. Try again shortly.", "err");
+
+  const data = Object.fromEntries(f.entries());
+  data.types = f.getAll("types");
+  delete data._gotcha;
+  data.submittedAt = new Date().toISOString();
+
+  go.disabled = true; go.textContent = "Sending";
+  try {
+    const res = await fetch(FORM_ENDPOINT, {method:"POST",headers:{"Content-Type":"application/json","Accept":"application/json"},body:JSON.stringify(data)});
+    if (!res.ok) throw new Error(res.status);
+    form.reset(); builderFields.hidden = true;
+    show("You're in! Day 1 starts 28 Nov.", "ok");
+  } catch (err) {
+    show("That didn't send. Try again or email contact@30products30days.com.", "err");
+  } finally {
+    go.disabled = false; go.textContent = "Join the list";
+  }
+});
 </script>
 </body>
 </html>
