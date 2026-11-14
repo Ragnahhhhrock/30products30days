@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>30 Products in 30 Days</title>
+<meta name="description" content="A public challenge: ship 30 products in 30 days. Digital, physical or service. Starting 28 November 2026.">
+<meta property="og:title" content="30 Products in 30 Days">
+<meta property="og:description" content="One new product every day for 30 days. Digital, physical or service. Starts 28 November 2026.">
+<meta property="og:url" content="https://30products30days.com">
+<meta property="og:type" content="website">
+<style>
+  :root{--bg:#0e0f12;--fg:#f3f1ea;--muted:#9a9a9f;--accent:#ffb020;--card:#17181d;--line:#2a2c33}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--fg);font:17px/1.6 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+  .wrap{max-width:860px;margin:0 auto;padding:0 24px}
+  header{padding:96px 0 56px;text-align:center}
+  .tag{display:inline-block;border:1px solid var(--line);border-radius:99px;padding:4px 14px;color:var(--muted);font-size:14px;margin-bottom:24px}
+  h1{font-size:clamp(40px,8vw,84px);line-height:1.02;margin:0 0 20px;letter-spacing:-.03em}
+  h1 span{color:var(--accent)}
+  .lead{color:var(--muted);font-size:20px;max-width:620px;margin:0 auto 32px}
+  .count{display:flex;gap:12px;justify-content:center;margin:0 0 8px}
+  .count div{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 18px;min-width:84px}
+  .count b{display:block;font-size:34px;font-variant-numeric:tabular-nums}
+  .count small{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.08em}
+  .note{color:var(--muted);font-size:14px}
+  section{padding:48px 0;border-top:1px solid var(--line)}
+  h2{font-size:28px;margin:0 0 16px;letter-spacing:-.01em}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px}
+  .card h3{margin:0 0 6px;font-size:18px}
+  .card p{margin:0;color:var(--muted);font-size:15px}
+  a{color:var(--accent)}
+  .btn{display:inline-block;background:var(--accent);color:#111;text-decoration:none;font-weight:600;padding:12px 22px;border-radius:10px}
+  footer{padding:40px 0 64px;border-top:1px solid var(--line);color:var(--muted);font-size:14px;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="tag">Starts 28 November 2026</div>
+    <h1><span>30</span> products.<br><span>30</span> days.</h1>
+    <p class="lead">One new product, every day, for a month. Digital, physical or service, built in the open and shipped fast.</p>
+    <div class="count" id="count" aria-live="polite">
+      <div><b id="d">--</b><small>days</small></div>
+      <div><b id="h">--</b><small>hours</small></div>
+      <div><b id="m">--</b><small>mins</small></div>
+      <div><b id="s">--</b><small>secs</small></div>
+    </div>
+    <div class="note" id="note">until day 1 (Perth time)</div>
+  </header>
+
+  <section>
+    <h2>The challenge</h2>
+    <div class="grid">
+      <div class="card"><h3>Digital</h3><p>Apps, tools, templates, games, sites.</p></div>
+      <div class="card"><h3>Physical</h3><p>Things you can hold, made and sent out.</p></div>
+      <div class="card"><h3>Service</h3><p>Something useful done for someone, packaged up.</p></div>
+    </div>
+    <p>Each day produces one finished product that someone can use. Every launch will be posted here as the 30 days unfold.</p>
+  </section>
+
+  <section>
+    <h2>Follow along</h2>
+    <p>Source and progress live on <a href="https://github.com/Ragnahhhhrock/30products30days">GitHub</a>. Want to join in with your own 30 days? Get in touch.</p>
+  </section>
+
+  <section>
+    <h2>Get in touch</h2>
+    <div class="grid">
+      <div class="card"><h3>General</h3><p>Questions, ideas, collaboration.</p><p style="margin-top:10px"><a href="mailto:contact@30products30days.com">contact@30products30days.com</a></p></div>
+      <div class="card"><h3>Sponsors</h3><p>Back the challenge or get your brand in front of it.</p><p style="margin-top:10px"><a href="mailto:sponsors@30products30days.com">sponsors@30products30days.com</a></p></div>
+    </div>
+  </section>
+
+  <footer>&copy; 2026 30products30days.com</footer>
+</div>
+<script>
+  // Day 1 = 28 Nov 2026 00:00 Perth (UTC+8)
+  var start = Date.parse('2026-11-28T00:00:00+08:00');
+  function pad(n){return String(n).padStart(2,'0')}
+  function tick(){
+    var diff = start - Date.now();
+    if (diff <= 0){
+      var day = Math.floor(-diff/864e5)+1;
+      document.getElementById('count').style.display='none';
+      document.getElementById('note').textContent = day <= 30 ? 'Day '+day+' of 30 is live' : 'Challenge complete';
+      return;
+    }
+    var s = Math.floor(diff/1000);
+    document.getElementById('d').textContent = Math.floor(s/86400);
+    document.getElementById('h').textContent = pad(Math.floor(s%86400/3600));
+    document.getElementById('m').textContent = pad(Math.floor(s%3600/60));
+    document.getElementById('s').textContent = pad(s%60);
+  }
+  tick(); setInterval(tick,1000);
+</script>
+</body>
+</html>
