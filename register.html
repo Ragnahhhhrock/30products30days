@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Join the challenge | 30 Products in 30 Days</title>
+<meta name="description" content="Sign up for 30 Products in 30 Days. Starts 28 November 2026.">
+<meta name="theme-color" content="#FFD21F">
+<link rel="canonical" href="https://30products30days.com/register.html">
+<meta property="og:title" content="Join 30 Products in 30 Days">
+<meta property="og:description" content="One new product every day for 30 days. Starts 28 November 2026.">
+<meta property="og:url" content="https://30products30days.com/register.html">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://30products30days.com/social/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://30products30days.com/social/twitter-card.png">
+<link rel="stylesheet" href="design-system/components/bundle.css">
+<style>
+  @font-face{font-family:"Bricolage Grotesque";font-weight:800;src:url(design-system/fonts/BricolageGrotesque-ExtraBold.ttf) format("truetype");font-display:swap}
+  @font-face{font-family:"Bricolage Grotesque";font-weight:500;src:url(design-system/fonts/BricolageGrotesque-Medium.ttf) format("truetype");font-display:swap}
+  @font-face{font-family:"DM Sans";font-weight:400;src:url(design-system/fonts/DMSans-Regular.ttf) format("truetype");font-display:swap}
+  @font-face{font-family:"DM Sans";font-weight:500;src:url(design-system/fonts/DMSans-Medium.ttf) format("truetype");font-display:swap}
+  @font-face{font-family:"DM Sans";font-weight:700;src:url(design-system/fonts/DMSans-Bold.ttf) format("truetype");font-display:swap}
+
+  /* Tokens (design-system/tokens.json) */
+  :root{
+    --surface-page:#F2F5FA;--surface-card:#FFFFFF;--ink:#0F1B3D;--ink-muted:#33415F;--outline:#0F1B3D;
+    --brand-launch:#FFD21F;--brand-flamingo:#FF6F91;--brand-orbit:#4B5BFF;--on-orbit:#FFFFFF;
+    --link:#3A49E6;--focus-ring:#3A49E6;--status-shipped:#0F1B3D;--on-status-shipped:#FFFFFF;
+    --font-display:"Bricolage Grotesque","Arial Black",Arial,sans-serif;--font-body:"DM Sans",Arial,sans-serif;
+    --space-1:4px;--space-2:8px;--space-3:16px;--space-4:24px;--space-5:40px;--space-6:64px;
+    --radius-sm:12px;--radius-md:20px;--radius-lg:28px;--radius-pill:999px;
+    --shadow-hard-sm:4px 4px 0 0 #0F1B3D;--shadow-hard-md:8px 8px 0 0 #0F1B3D;--border-w:3px;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{--surface-page:#0B1330;--surface-card:#16234F;--ink:#F2F5FA;--ink-muted:#B9C3DD;--outline:#F2F5FA;
+      --link:#A5AFFF;--focus-ring:#FFD21F;--status-shipped:#F2F5FA;--on-status-shipped:#0F1B3D;
+      --shadow-hard-sm:4px 4px 0 0 #050A1F;--shadow-hard-md:8px 8px 0 0 #050A1F}
+  }
+
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--surface-page);color:var(--ink);font:400 16px/1.55 var(--font-body)}
+  .wrap{max-width:640px;margin:0 auto;padding:var(--space-5) var(--space-3) var(--space-6)}
+  .label{font:700 13px/1.3 var(--font-body);letter-spacing:2px;text-transform:uppercase;margin:0 0 var(--space-2)}
+  h1{font:800 clamp(36px,9vw,56px)/1 var(--font-display);letter-spacing:-2px;margin:0 0 var(--space-3)}
+  h1 mark{background:var(--brand-launch);color:#0F1B3D;padding:0 10px;border-radius:var(--radius-sm)}
+  .lead{font-size:20px;line-height:1.55;margin:0 0 var(--space-4);color:var(--ink-muted)}
+
+  .panel{background:var(--surface-card);border:var(--border-w) solid var(--outline);border-radius:var(--radius-lg);box-shadow:var(--shadow-hard-md);overflow:hidden}
+  .panel__head{background:var(--brand-flamingo);color:#0F1B3D;border-bottom:var(--border-w) solid var(--outline);padding:20px var(--space-4);font:800 22px/1.15 var(--font-display);letter-spacing:-.5px}
+  form{padding:var(--space-4);display:flex;flex-direction:column;gap:var(--space-4)}
+
+  .field{display:flex;flex-direction:column;gap:6px;border:0;padding:0;margin:0;min-width:0}
+  .field > label,.field > legend{font:700 16px/1.3 var(--font-body);padding:0}
+  .hint{font-weight:400;color:var(--ink-muted);font-size:14px}
+  input[type=text],input[type=email],input[type=url],select,textarea{
+    width:100%;min-height:44px;padding:10px 14px;font:400 16px/1.4 var(--font-body);color:var(--ink);
+    background:var(--surface-card);border:var(--border-w) solid var(--outline);border-radius:var(--radius-sm)}
+  textarea{min-height:100px;resize:vertical}
+  input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--focus-ring);outline-offset:2px}
+  ::placeholder{color:var(--ink-muted);opacity:.8}
+
+  .opts{display:flex;flex-wrap:wrap;gap:var(--space-2)}
+  .opts label{position:relative;cursor:pointer}
+  .opts input{position:absolute;opacity:0;inset:0;width:100%;height:100%;margin:0;cursor:pointer}
+  .opts span{display:inline-flex;align-items:center;min-height:44px;padding:8px 18px;font:700 15px/1 var(--font-body);
+    border:var(--border-w) dashed var(--outline);border-radius:var(--radius-pill);background:var(--surface-card);color:var(--ink)}
+  .opts input:checked + span{background:var(--status-shipped);color:var(--on-status-shipped);border-style:solid}
+  .opts input:focus-visible + span{outline:3px solid var(--focus-ring);outline-offset:3px}
+
+  .consent{display:flex;gap:12px;align-items:flex-start}
+  .consent input{width:24px;height:24px;margin:2px 0 0;flex:none;accent-color:var(--brand-orbit)}
+  .consent input:focus-visible{outline:3px solid var(--focus-ring);outline-offset:2px}
+
+  .status{display:none;padding:14px 16px;border:var(--border-w) solid var(--outline);border-radius:var(--radius-sm);font-weight:700}
+  .status.ok{display:block;background:var(--brand-launch);color:#0F1B3D}
+  .status.err{display:block;background:var(--brand-flamingo);color:#0F1B3D}
+  .l30-btn{width:100%}
+  .hp{position:absolute;left:-9999px;height:0;overflow:hidden}
+  [hidden]{display:none!important}
+  .foot{margin-top:var(--space-4);color:var(--ink-muted);font-size:14px}
+  a{color:var(--link)}
+  a:focus-visible{outline:3px solid var(--focus-ring);outline-offset:2px}
+  @media (prefers-reduced-motion:reduce){.l30-btn{transition:none}}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <p class="label">Starts 28 Nov 2026</p>
+  <h1>Join the <mark>30</mark> days</h1>
+  <p class="lead">One product a day, digital, physical or service. Build your own or follow along.</p>
+
+  <div class="panel">
+    <div class="panel__head">Sign up</div>
+    <form id="reg" novalidate>
+      <div class="field">
+        <label for="name">Name</label>
+        <input type="text" id="name" name="name" required autocomplete="name">
+      </div>
+
+      <div class="field">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" required autocomplete="email">
+      </div>
+
+      <div class="field">
+        <label for="link">Website or social link <span class="hint">optional</span></label>
+        <input type="url" id="link" name="link" placeholder="https://">
+      </div>
+
+      <div class="field">
+        <label for="location">Country and time zone <span class="hint">optional</span></label>
+        <input type="text" id="location" name="location" placeholder="Australia, Perth">
+      </div>
+
+      <div class="field">
+        <label for="role">How do you want to take part?</label>
+        <select id="role" name="role" required>
+          <option value="">Choose one</option>
+          <option value="builder-full">Build all 30 products</option>
+          <option value="builder-part">Build some products</option>
+          <option value="follower">Follow along</option>
+          <option value="customer">Buy or pre-order products</option>
+          <option value="sponsor">Sponsor or partner</option>
+        </select>
+      </div>
+
+      <div id="builderFields" hidden>
+        <fieldset class="field">
+          <legend>What will you make? <span class="hint">pick any</span></legend>
+          <div class="opts">
+            <label><input type="checkbox" name="types" value="digital"><span>Digital</span></label>
+            <label><input type="checkbox" name="types" value="physical"><span>Physical</span></label>
+            <label><input type="checkbox" name="types" value="service"><span>Service</span></label>
+          </div>
+        </fieldset>
+
+        <div class="field" style="margin-top:var(--space-4)">
+          <label for="plan">What do you plan to build? <span class="hint">a rough idea is fine</span></label>
+          <textarea id="plan" name="plan"></textarea>
+        </div>
+
+        <div class="field" style="margin-top:var(--space-4)">
+          <label for="tools">Tools you will use <span class="hint">optional</span></label>
+          <input type="text" id="tools" name="tools" placeholder="Claude, Cloudflare">
+        </div>
+      </div>
+
+      <fieldset class="field">
+        <legend>Interested in the competition? <span class="hint">highest-rated builder wins the prize pot</span></legend>
+        <div class="opts">
+          <label><input type="radio" name="competition" value="yes"><span>Yes</span></label>
+          <label><input type="radio" name="competition" value="maybe" checked><span>Maybe</span></label>
+          <label><input type="radio" name="competition" value="no"><span>No</span></label>
+        </div>
+      </fieldset>
+
+      <div class="field">
+        <label for="notes">Anything else? <span class="hint">optional</span></label>
+        <textarea id="notes" name="notes"></textarea>
+      </div>
+
+      <label class="consent"><input type="checkbox" id="consent" name="consent" required>
+        <span>Email me challenge updates. I can unsubscribe any time.</span></label>
+
+      <div class="hp" aria-hidden="true"><label>Leave blank <input type="text" name="_gotcha" tabindex="-1" autocomplete="off"></label></div>
+
+      <button type="submit" id="go" class="l30-btn l30-btn--primary">Join the list</button>
+      <div class="status" id="msg" role="status" aria-live="polite"></div>
+    </form>
+  </div>
+
+  <p class="foot">Questions? <a href="mailto:contact@30products30days.com">contact@30products30days.com</a>. <a href="/">Back to the challenge</a></p>
+</main>
+
+<script>
+// Set to a form endpoint that accepts a JSON POST (e.g. Formspree or a Cloudflare Worker).
+const FORM_ENDPOINT = "";
+
+const form = document.getElementById("reg");
+const msg = document.getElementById("msg");
+const go = document.getElementById("go");
+const role = document.getElementById("role");
+const builderFields = document.getElementById("builderFields");
+
+role.addEventListener("change", () => { builderFields.hidden = !role.value.startsWith("builder"); });
+
+function show(text, cls){ msg.textContent = text; msg.className = "status " + cls; }
+
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const f = new FormData(form);
+  if (f.get("_gotcha")) return;
+  const name = (f.get("name")||"").trim(), email = (f.get("email")||"").trim();
+  if (!name) return show("Add your name.", "err");
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return show("Add a valid email address.", "err");
+  if (!f.get("role")) return show("Choose how you want to take part.", "err");
+  if (!document.getElementById("consent").checked) return show("Tick the email box to join.", "err");
+  if (!FORM_ENDPOINT) return show("Sign-ups open soon. Try again shortly.", "err");
+
+  const data = Object.fromEntries(f.entries());
+  data.types = f.getAll("types");
+  delete data._gotcha;
+  data.submittedAt = new Date().toISOString();
+
+  go.disabled = true; go.textContent = "Sending";
+  try {
+    const res = await fetch(FORM_ENDPOINT, {method:"POST",headers:{"Content-Type":"application/json","Accept":"application/json"},body:JSON.stringify(data)});
+    if (!res.ok) throw new Error(res.status);
+    form.reset(); builderFields.hidden = true;
+    show("You're in! Day 1 starts 28 Nov.", "ok");
+  } catch (err) {
+    show("That didn't send. Try again or email contact@30products30days.com.", "err");
+  } finally {
+    go.disabled = false; go.textContent = "Join the list";
+  }
+});
+</script>
+</body>
+</html>
