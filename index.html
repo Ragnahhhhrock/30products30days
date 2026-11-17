@@ -251,7 +251,7 @@
         <div class="field"><label for="cf-email">Email</label><input type="email" id="cf-email" name="email" required autocomplete="email" maxlength="200"></div>
         <div class="field"><label for="cf-message">Message</label><textarea id="cf-message" name="message" required minlength="10" maxlength="4000"></textarea></div>
         <div class="hp" aria-hidden="true"><label>Leave blank <input type="text" name="_gotcha" tabindex="-1" autocomplete="off"></label></div>
-        <div class="cf-turnstile" data-sitekey="TURNSTILE_SITEKEY"></div>
+        <div class="cf-turnstile" data-sitekey="0x4AAAAAAGF6g2TF2JRMYtWo"></div>
         <button type="submit" id="cf-go" class="l30-btn l30-btn--primary">Send message</button>
         <div class="status" id="cf-msg" role="status" aria-live="polite"></div>
       </form>
@@ -328,8 +328,8 @@ form.addEventListener("submit", async (e) => {
 </script>
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <script>
-// Contact form -> Cloudflare Worker (worker/contact). Replace both placeholders after deploying.
-const CONTACT_ENDPOINT = "CONTACT_ENDPOINT";
+// Contact form -> Cloudflare Worker (worker/contact).
+const CONTACT_ENDPOINT = "https://30p30d-contact.malgordonperth.workers.dev";
 const cf = document.getElementById("cf"), cfMsg = document.getElementById("cf-msg"), cfGo = document.getElementById("cf-go");
 function cfShow(t, c){ cfMsg.textContent = t; cfMsg.className = "status " + c; }
 cf.addEventListener("submit", async (e) => {
