@@ -1,0 +1,8 @@
+name = "30p30d-contact"
+main = "index.js"
+compatibility_date = "2026-11-01"
+
+# Delivers to any verified Email Routing destination; the address itself lives in the TO_EMAIL secret.
+send_email = [{ name = "MAIL" }]
+
+# Secrets: wrangler secret put TURNSTILE_SECRET ; wrangler secret put TO_EMAIL

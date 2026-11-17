@@ -161,7 +161,7 @@
     </form>
   </div>
 
-  <p class="foot">Questions? <a href="mailto:contact@30products30days.com">contact@30products30days.com</a>. <a href="/">Back to the challenge</a></p>
+  <p class="foot">Questions? <a href="/#cf">Send a message</a>. <a href="/">Back to the challenge</a></p>
 </main>
 
 <script>
@@ -201,7 +201,7 @@ form.addEventListener("submit", async (e) => {
     form.reset(); builderFields.hidden = true;
     show("You're in! Day 1 starts 28 Nov.", "ok");
   } catch (err) {
-    show("That didn't send. Try again or email contact@30products30days.com.", "err");
+    show("That didn't send. Try again in a moment.", "err");
   } finally {
     go.disabled = false; go.textContent = "Join the list";
   }

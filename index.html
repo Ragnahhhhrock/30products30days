@@ -107,6 +107,11 @@
   .status.ok{display:block;background:var(--brand-launch);color:#0F1B3D}
   .status.err{display:block;background:var(--brand-flamingo);color:#0F1B3D}
   #reg .l30-btn{width:100%}
+  #cf{padding:var(--space-4);display:flex;flex-direction:column;gap:var(--space-4)}
+  #cf input[type=text],#cf input[type=email],#cf select,#cf textarea{width:100%;min-height:44px;padding:10px 14px;font:400 16px/1.4 var(--font-body);color:var(--ink);background:var(--surface-card);border:var(--border-w) solid var(--outline);border-radius:var(--radius-sm)}
+  #cf textarea{min-height:120px;resize:vertical}
+  #cf input:focus-visible,#cf select:focus-visible,#cf textarea:focus-visible{outline:3px solid var(--focus-ring);outline-offset:2px}
+  #cf .l30-btn{width:100%}
   .hp{position:absolute;left:-9999px;height:0;overflow:hidden}
   [hidden]{display:none!important}
   @media (prefers-reduced-motion:reduce){.l30-btn{transition:none}}
@@ -236,9 +241,20 @@
   <section>
     <p class="label">Say hello</p>
     <h2>Get in touch</h2>
-    <div class="grid">
-      <article class="panel"><div class="panel__head panel__head--pink">General</div><div class="panel__body"><p class="muted">Questions, ideas, collaboration.</p><p><a href="mailto:contact@30products30days.com">contact@30products30days.com</a></p></div></article>
-      <article class="panel"><div class="panel__head panel__head--yellow">Sponsors</div><div class="panel__body"><p class="muted">Back the challenge or get your brand in front of it.</p><p><a href="mailto:sponsors@30products30days.com">sponsors@30products30days.com</a></p></div></article>
+    <div class="panel">
+      <form id="cf" novalidate>
+        <div class="field">
+          <label for="cf-topic">What is this about?</label>
+          <select id="cf-topic" name="topic"><option value="general">General: questions, ideas, collaboration</option><option value="sponsors">Sponsors: back the challenge</option></select>
+        </div>
+        <div class="field"><label for="cf-name">Name</label><input type="text" id="cf-name" name="name" required autocomplete="name" maxlength="100"></div>
+        <div class="field"><label for="cf-email">Email</label><input type="email" id="cf-email" name="email" required autocomplete="email" maxlength="200"></div>
+        <div class="field"><label for="cf-message">Message</label><textarea id="cf-message" name="message" required minlength="10" maxlength="4000"></textarea></div>
+        <div class="hp" aria-hidden="true"><label>Leave blank <input type="text" name="_gotcha" tabindex="-1" autocomplete="off"></label></div>
+        <div class="cf-turnstile" data-sitekey="TURNSTILE_SITEKEY"></div>
+        <button type="submit" id="cf-go" class="l30-btn l30-btn--primary">Send message</button>
+        <div class="status" id="cf-msg" role="status" aria-live="polite"></div>
+      </form>
     </div>
   </section>
 </main>
@@ -304,10 +320,38 @@ form.addEventListener("submit", async (e) => {
     form.reset(); builderFields.hidden = true;
     show("You're in! Day 1 starts 28 Nov.", "ok");
   } catch (err) {
-    show("That didn't send. Try again or email contact@30products30days.com.", "err");
+    show("That didn't send. Try again in a moment.", "err");
   } finally {
     go.disabled = false; go.textContent = "Join the list";
   }
+});
+</script>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+<script>
+// Contact form -> Cloudflare Worker (worker/contact). Replace both placeholders after deploying.
+const CONTACT_ENDPOINT = "CONTACT_ENDPOINT";
+const cf = document.getElementById("cf"), cfMsg = document.getElementById("cf-msg"), cfGo = document.getElementById("cf-go");
+function cfShow(t, c){ cfMsg.textContent = t; cfMsg.className = "status " + c; }
+cf.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const f = new FormData(cf);
+  if (f.get("_gotcha")) return;
+  const name = (f.get("name")||"").trim(), email = (f.get("email")||"").trim(), message = (f.get("message")||"").trim();
+  if (!name) return cfShow("Add your name.", "err");
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return cfShow("Add a valid email address.", "err");
+  if (message.length < 10) return cfShow("Write a short message.", "err");
+  const token = f.get("cf-turnstile-response");
+  if (!token) return cfShow("Complete the check below first.", "err");
+  cfGo.disabled = true; cfGo.textContent = "Sending";
+  try {
+    const res = await fetch(CONTACT_ENDPOINT, {method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name,email,message,topic:f.get("topic"),token})});
+    if (!res.ok) throw new Error(res.status);
+    cf.reset(); if (window.turnstile) turnstile.reset();
+    cfShow("Thanks, message sent.", "ok");
+  } catch (err) {
+    cfShow("That didn't send. Try again in a moment.", "err");
+    if (window.turnstile) turnstile.reset();
+  } finally { cfGo.disabled = false; cfGo.textContent = "Send message"; }
 });
 </script>
 </body>
