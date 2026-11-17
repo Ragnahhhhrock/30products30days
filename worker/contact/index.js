@@ -42,7 +42,7 @@ export default {
     const ts = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
       method: "POST",
       body: new URLSearchParams({
-        secret: env.TURNSTILE_SECRET,
+        secret: String(env.TURNSTILE_SECRET ?? "").replace(/\s+/g, ""),
         response: String(d.token ?? ""),
         remoteip: request.headers.get("CF-Connecting-IP") || "",
       }),
