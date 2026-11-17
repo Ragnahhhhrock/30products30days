@@ -47,7 +47,7 @@ export default {
         remoteip: request.headers.get("CF-Connecting-IP") || "",
       }),
     }).then((r) => r.json()).catch(() => ({ success: false }));
-    if (!ts.success) return json({ ok: false, error: "captcha" }, 400, origin);
+    if (!ts.success) return json({ ok: false, error: "captcha", codes: ts["error-codes"] }, 400, origin);
 
     // Cold-outreach filter: silently drop, do not tip off the sender
     if (SPAM.test(`${name} ${message}`) || (message.match(/https?:\/\//g) || []).length > 2)
