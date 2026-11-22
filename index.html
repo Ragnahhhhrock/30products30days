@@ -9,6 +9,7 @@ function gtag(){dataLayer.push(arguments);}
 gtag('js',new Date());
 gtag('config','G-FM1RLPT7RK');
 </script>
+<script src="/analytics.js" defer></script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>30 Products in 30 Days</title>
@@ -304,7 +305,7 @@ const builderFields = document.getElementById("builderFields");
 
 role.addEventListener("change", () => { builderFields.hidden = !role.value.startsWith("builder"); });
 
-function show(text, cls){ msg.textContent = text; msg.className = "status " + cls; }
+function show(text, cls){ msg.textContent = text; msg.className = "status " + cls; if (cls === "err" && window.track) track("form_error", {form_name:"signup", error_message:text}); }
 
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -326,6 +327,7 @@ form.addEventListener("submit", async (e) => {
   try {
     const res = await fetch(FORM_ENDPOINT, {method:"POST",headers:{"Content-Type":"application/json","Accept":"application/json"},body:JSON.stringify(data)});
     if (!res.ok) throw new Error(res.status);
+    if (window.track) track("sign_up", {method:"waitlist", role:data.role, product_types:data.types.join(",")});
     form.reset(); builderFields.hidden = true;
     show("You're in! Day 1 starts 28 Nov.", "ok");
   } catch (err) {
@@ -340,7 +342,7 @@ form.addEventListener("submit", async (e) => {
 // Contact form -> Cloudflare Worker (worker/contact).
 const CONTACT_ENDPOINT = "https://30p30d-contact.malgordonperth.workers.dev";
 const cf = document.getElementById("cf"), cfMsg = document.getElementById("cf-msg"), cfGo = document.getElementById("cf-go");
-function cfShow(t, c){ cfMsg.textContent = t; cfMsg.className = "status " + c; }
+function cfShow(t, c){ cfMsg.textContent = t; cfMsg.className = "status " + c; if (c === "err" && window.track) track("form_error", {form_name:"contact", error_message:t}); }
 cf.addEventListener("submit", async (e) => {
   e.preventDefault();
   const f = new FormData(cf);
@@ -355,6 +357,7 @@ cf.addEventListener("submit", async (e) => {
   try {
     const res = await fetch(CONTACT_ENDPOINT, {method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name,email,message,topic:f.get("topic"),token})});
     if (!res.ok) throw new Error(res.status);
+    if (window.track) { track("generate_lead", {form_name:"contact", topic:f.get("topic")}); if (f.get("topic") === "sponsors") track("sponsor_enquiry"); }
     cf.reset(); if (window.turnstile) turnstile.reset();
     cfShow("Thanks, message sent.", "ok");
   } catch (err) {

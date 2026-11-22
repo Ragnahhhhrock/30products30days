@@ -9,6 +9,7 @@ function gtag(){dataLayer.push(arguments);}
 gtag('js',new Date());
 gtag('config','G-FM1RLPT7RK');
 </script>
+<script src="/analytics.js" defer></script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Join the challenge | 30 Products in 30 Days</title>
@@ -184,7 +185,7 @@ const builderFields = document.getElementById("builderFields");
 
 role.addEventListener("change", () => { builderFields.hidden = !role.value.startsWith("builder"); });
 
-function show(text, cls){ msg.textContent = text; msg.className = "status " + cls; }
+function show(text, cls){ msg.textContent = text; msg.className = "status " + cls; if (cls === "err" && window.track) track("form_error", {form_name:"signup", error_message:text}); }
 
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -206,6 +207,7 @@ form.addEventListener("submit", async (e) => {
   try {
     const res = await fetch(FORM_ENDPOINT, {method:"POST",headers:{"Content-Type":"application/json","Accept":"application/json"},body:JSON.stringify(data)});
     if (!res.ok) throw new Error(res.status);
+    if (window.track) track("sign_up", {method:"waitlist", role:data.role, product_types:data.types.join(",")});
     form.reset(); builderFields.hidden = true;
     show("You're in! Day 1 starts 28 Nov.", "ok");
   } catch (err) {

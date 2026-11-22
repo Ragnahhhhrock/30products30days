@@ -127,6 +127,7 @@ function gtag(){{dataLayer.push(arguments);}}
 gtag('js',new Date());
 gtag('config','G-FM1RLPT7RK');
 </script>
+<script src="/analytics.js" defer></script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{E(title)}</title>
