@@ -119,6 +119,14 @@ def page(title, desc, url, hero, main, ogimg="/social/og-image.png"):
     return f"""<!DOCTYPE html>
 <html lang="en">
 <head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-FM1RLPT7RK"></script>
+<script>
+window.dataLayer=window.dataLayer||[];
+function gtag(){{dataLayer.push(arguments);}}
+gtag('js',new Date());
+gtag('config','G-FM1RLPT7RK');
+</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{E(title)}</title>
