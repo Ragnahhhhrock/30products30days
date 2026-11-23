@@ -24,3 +24,6 @@ link: https://example.com
 Body in Markdown: paragraphs, ## headings, - lists, **bold**, [links](https://...).
 ```
 Voice: upbeat and short. Say what it is, who it is for and what it costs. Sentence case, one exclamation mark at most.
+
+## Advent calendar
+`build.py` also writes `advent/index.html`: 30 doors, one per day (Day 1 = 28 Nov 2026, Perth time). A door tears open only when its date has arrived **and** its post is in `blog/posts/`; the reveal shows the product and links to the post. Unpublished days carry no product info, so nothing leaks early. Publishing a post (steps above) updates the calendar.

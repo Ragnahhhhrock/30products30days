@@ -115,7 +115,7 @@ CSS = """
   @media (prefers-reduced-motion:reduce){.item{transition:none}.item:hover{transform:none}}
 """
 
-def page(title, desc, url, hero, main, ogimg="/social/og-image.png"):
+def page(title, desc, url, hero, main, ogimg="/social/og-image.png", extra_css="", script="", wide=False):
     return f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -145,14 +145,15 @@ gtag('config','G-FM1RLPT7RK');
 <link rel="canonical" href="{SITE}{url}">
 <link rel="alternate" type="application/rss+xml" title="30 Products in 30 Days" href="{SITE}/blog/feed.xml">
 <link rel="stylesheet" href="/design-system/components/bundle.css">
-<style>{CSS}</style>
+<style>{CSS}{extra_css}</style>
 </head>
 <body>
 {hero}
-<main class="wrap">
+<main class="wrap{" wrap--wide" if wide else ""}">
 {main}
 </main>
-<footer><div class="wrap"><img src="/brand/logos/launch-badge.svg" alt="" width="32" height="32"><span>&copy; 2026 30products30days.com</span><a href="/">Home</a><a href="/blog/">Blog</a></div></footer>
+<footer><div class="wrap"><img src="/brand/logos/launch-badge.svg" alt="" width="32" height="32"><span>&copy; 2026 30products30days.com</span><a href="/">Home</a><a href="/blog/">Blog</a><a href="/advent/">Advent calendar</a></div></footer>
+{script}
 </body>
 </html>
 """
@@ -188,13 +189,129 @@ def build_feed(posts):
 <rss version="2.0"><channel><title>30 Products in 30 Days</title><link>{SITE}/blog/</link><description>One launch and one post every day from 28 November 2026.</description><language>en-AU</language>{items}</channel></rss>
 """, encoding="utf-8")
 
+
+START = dt.date(2026, 11, 28)  # Day 1
+
+ADVENT_CSS = """
+  .wrap--wide{max-width:1240px}
+  .hero--advent .wrap{display:block}
+  .hero--advent .l30-progress{margin-top:var(--space-4)}
+  .hero--advent .l30-progress,.hero--advent .l30-progress__label{color:#0F1B3D}
+  .hero--advent .l30-progress__track{background:#FFFFFF}
+  .doors{list-style:none;margin:0;padding:0 8px 8px 0;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:var(--space-4)}
+  .door{position:relative;aspect-ratio:3/4;min-height:240px;border:var(--border-w) solid var(--outline);border-radius:var(--radius-md);box-shadow:var(--shadow-hard-sm);background:var(--surface-card)}
+  .door__inside{position:absolute;inset:0;border-radius:17px;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:space-between;gap:var(--space-2);padding:12px;text-align:center}
+  .door__inside h2{font:800 clamp(16px,1.6vw,19px)/1.1 var(--font-display);letter-spacing:-.5px;margin:0;overflow-wrap:anywhere}
+  .door__type{margin:0}
+  .door .l30-btn{width:100%;padding:12px 8px}
+  .door__cover{all:unset;box-sizing:border-box;position:absolute;inset:0;display:block;cursor:pointer;z-index:2;border-radius:17px}
+  .door__cover:focus-visible{outline:3px solid var(--focus-ring);outline-offset:4px}
+  .half{position:absolute;inset:0;display:block;will-change:transform}
+  .half__in{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--space-2);text-align:center}
+  .half--l .half__in{clip-path:polygon(0 0,52% 0,47% 12%,54% 25%,46% 38%,53% 50%,47% 63%,54% 76%,46% 88%,52% 100%,0 100%);border-radius:17px 0 0 17px}
+  .half--r .half__in{clip-path:polygon(52% 0,100% 0,100% 100%,52% 100%,46% 88%,54% 76%,47% 63%,53% 50%,46% 38%,54% 25%,47% 12%);border-radius:0 17px 17px 0}
+  .half--l{transform-origin:0 100%}.half--r{transform-origin:100% 100%}
+  .door--pink .half__in{background:var(--brand-flamingo);color:#0F1B3D}
+  .door--blue .half__in{background:var(--brand-orbit);color:var(--on-orbit)}
+  .door__date{font:800 22px/1 var(--font-display);letter-spacing:-.5px}
+  .door__hint{font:700 12px/1.2 var(--font-body);letter-spacing:2px;text-transform:uppercase}
+  .door__cover::after{content:"";position:absolute;top:10px;bottom:10px;left:50%;border-left:3px dashed currentColor;opacity:.45;pointer-events:none}
+  .door--pink .door__cover::after{color:#0F1B3D}.door--blue .door__cover::after{color:#FFFFFF}
+  .door--locked .door__cover{cursor:not-allowed}
+  .door--locked .half__in{background:var(--surface-card);color:var(--ink-muted)}
+  .door--locked .door__cover::after{display:none}
+  .door--locked{border-style:dashed}
+  .door .l30-badge{filter:none}
+  .today-tag{position:absolute;top:-14px;left:12px;z-index:3;background:#0F1B3D;color:#FFFFFF;border:2px solid #0F1B3D;border-radius:var(--radius-pill);padding:2px 10px;font:700 12px/1.3 var(--font-body)}
+  .today-tag[hidden]{display:none}
+  @keyframes tear-l{0%{transform:none}12%{transform:translateX(-1.5%) rotate(-1.5deg)}100%{transform:translate(-85%,35%) rotate(-28deg);opacity:0}}
+  @keyframes tear-r{0%{transform:none}12%{transform:translateX(1.5%) rotate(1.5deg)}100%{transform:translate(85%,35%) rotate(28deg);opacity:0}}
+  .door.is-tearing .door__cover{pointer-events:none}
+  .door.is-tearing .door__cover::after{display:none}
+  .door.is-tearing .half--l{filter:drop-shadow(3px 0 0 var(--outline));animation:tear-l .85s cubic-bezier(.55,0,.85,.4) forwards}
+  .door.is-tearing .half--r{filter:drop-shadow(-3px 0 0 var(--outline));animation:tear-r .85s cubic-bezier(.55,0,.85,.4) forwards}
+  .door.is-open .door__cover{display:none}
+  @media (max-width:1100px){.doors{grid-template-columns:repeat(4,minmax(0,1fr))}}
+  @media (max-width:760px){.doors{grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--space-3)}}
+  @media (prefers-reduced-motion:reduce){.door.is-tearing .half{animation:none;opacity:0}}
+"""
+
+ADVENT_JS = """<script>
+(function(){
+  var KEY="l30-advent-opened",reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var q=new URLSearchParams(location.search).get("today");
+  var today=/^\\d{4}-\\d{2}-\\d{2}$/.test(q||"")?q:new Intl.DateTimeFormat("en-CA",{timeZone:"Australia/Perth"}).format(new Date());
+  var opened=[];try{opened=JSON.parse(localStorage.getItem(KEY)||"[]")}catch(e){}
+  function save(d){if(opened.indexOf(d)<0)opened.push(d);try{localStorage.setItem(KEY,JSON.stringify(opened))}catch(e){}}
+  function finish(door,focus){
+    door.classList.remove("is-tearing");door.classList.add("is-open");
+    var ins=door.querySelector(".door__inside");ins.removeAttribute("inert");ins.removeAttribute("aria-hidden");
+    if(focus){var a=ins.querySelector("a");if(a)a.focus()}
+  }
+  document.querySelectorAll(".door").forEach(function(door){
+    var date=door.dataset.date,has=door.dataset.post==="1",cover=door.querySelector(".door__cover"),tag=door.querySelector(".today-tag");
+    if(date===today&&tag)tag.hidden=false;
+    if(!has||date>today)return;
+    door.classList.remove("door--locked");cover.disabled=false;cover.removeAttribute("aria-disabled");
+    cover.setAttribute("aria-label","Tear open Day "+door.dataset.day+", "+door.dataset.label);
+    cover.querySelectorAll(".door__hint").forEach(function(h){h.textContent="Tear me open"});
+    if(opened.indexOf(date)>=0){finish(door,false);return}
+    cover.addEventListener("click",function(){
+      if(door.classList.contains("is-tearing"))return;
+      save(date);
+      if(typeof window.track==="function")window.track("advent_open",{challenge_day:+door.dataset.day});
+      if(reduce){finish(door,true);return}
+      door.classList.add("is-tearing");
+      var done=false,end=function(){if(done)return;done=true;finish(door,true)};
+      door.querySelector(".half--r").addEventListener("animationend",end);
+      setTimeout(end,1300);
+    });
+  });
+})();
+</script>"""
+
+def build_advent(posts):
+    by_day = {p["day"]: p for p in posts}
+    doors = []
+    for n in range(1, 31):
+        d = START + dt.timedelta(days=n - 1); label = f"{d.day} {d:%b}"
+        p = by_day.get(n); colour = "pink" if n % 2 else "blue"
+        if p:
+            inside = (f'<div class="door__inside" inert aria-hidden="true">{badge(n,48)}<h2>{E(p["title"])}</h2>'
+                      f'<span class="l30-tag l30-tag--shipped door__type">{E(p["type"])}</span>'
+                      f'<a class="l30-btn l30-btn--primary" href="/blog/{p["slug"]}/">Read the post</a></div>')
+        else:
+            inside = '<div class="door__inside" aria-hidden="true"></div>'
+        def half(side, hidden):
+            aria = ' aria-hidden="true"' if hidden else ""
+            return (f'<span class="half half--{side}"{aria}><span class="half__in">'
+                    f'{badge(n,56)}<span class="door__date">{label}</span><span class="door__hint">Day {n:02d}</span></span></span>')
+        cover = (f'<button type="button" class="door__cover" disabled aria-disabled="true" aria-label="Day {n:02d}, {label}, not open yet">'
+                 f'{half("l",False)}{half("r",True)}</button>')
+        doors.append(f'<li class="door door--{colour} door--locked" data-day="{n}" data-date="{d}" data-label="{label}" data-post="{1 if p else 0}">'
+                     f'<span class="today-tag" hidden>Today</span>{inside}{cover}</li>')
+    shipped = len(posts)
+    hero = f"""<header class="hero hero--advent"><div class="wrap">
+<p class="label">28 Nov to 27 Dec 2026</p>
+<h1>Advent <mark>calendar</mark></h1>
+<p class="lead">One door a day. Tear it open to reveal the product we launched, then read the post.</p>
+<div class="l30-progress" role="progressbar" aria-valuemin="0" aria-valuemax="30" aria-valuenow="{shipped}" aria-label="{shipped} of 30 shipped">
+<div class="l30-progress__label">{shipped} OF 30 SHIPPED</div>
+<div class="l30-progress__track"><div class="l30-progress__fill" style="width:{shipped/30*100:.1f}%"></div></div></div>
+</div></header>"""
+    main = f'<ol class="doors" aria-label="Advent calendar">{"".join(doors)}</ol>'
+    out = ROOT.parent / "advent"; out.mkdir(exist_ok=True)
+    html_ = page("Advent calendar | 30 Products in 30 Days", "One door a day. Tear it open to reveal the product launched that day.",
+                 "/advent/", hero, main, extra_css=ADVENT_CSS, script=ADVENT_JS, wide=True)
+    (out / "index.html").write_text(html_.replace('og:type" content="article"', 'og:type" content="website"'), encoding="utf-8")
+
 def main():
     posts = sorted((parse(f) for f in (ROOT / "posts").glob("*.md")), key=lambda p: p["day"], reverse=True)
     live = {p["slug"] for p in posts}
     for d in ROOT.iterdir():  # drop pages for posts that were unpublished
         if d.is_dir() and d.name.startswith("day-") and d.name not in live: shutil.rmtree(d)
     for p in posts: build_post(p)
-    build_index(posts); build_feed(posts)
+    build_index(posts); build_feed(posts); build_advent(posts)
     print(f"built {len(posts)} post(s)")
 
 if __name__ == "__main__": main()
