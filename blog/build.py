@@ -115,7 +115,14 @@ CSS = """
   @media (prefers-reduced-motion:reduce){.item{transition:none}.item:hover{transform:none}}
 """
 
-def page(title, desc, url, hero, main, ogimg="/social/og-image.png", extra_css="", script="", wide=False):
+NAV_ITEMS = [('home', '/', 'Home'), ('blog', '/blog/', 'Blog'), ('advent', '/advent/', 'Advent calendar'), ('join', '/register.html', 'Join'), ('contact', '/#cf', 'Contact')]
+
+def nav(cur):
+    li = "".join(f'<li><a class="site-nav__link" href="{h}"{" aria-current=" + chr(34) + "page" + chr(34) if k == cur else ""}>{t}</a></li>' for k, h, t in NAV_ITEMS)
+    return ('<header class="site-nav"><div class="site-nav__in"><a class="site-nav__brand" href="/"><img src="/brand/logos/launch-badge.svg" alt="" width="36" height="36"><span>30 Products 30 Days</span></a>'
+            f'<nav aria-label="Main"><ul class="site-nav__list">{li}</ul></nav></div></header>')
+
+def page(title, desc, url, hero, main, ogimg="/social/og-image.png", extra_css="", script="", wide=False, current="blog"):
     return f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -145,9 +152,11 @@ gtag('config','G-FM1RLPT7RK');
 <link rel="canonical" href="{SITE}{url}">
 <link rel="alternate" type="application/rss+xml" title="30 Products in 30 Days" href="{SITE}/blog/feed.xml">
 <link rel="stylesheet" href="/design-system/components/bundle.css">
+<link rel="stylesheet" href="/site-nav.css">
 <style>{CSS}{extra_css}</style>
 </head>
 <body>
+{nav(current)}
 {hero}
 <main class="wrap{" wrap--wide" if wide else ""}">
 {main}
@@ -302,7 +311,7 @@ def build_advent(posts):
     main = f'<ol class="doors" aria-label="Advent calendar">{"".join(doors)}</ol>'
     out = ROOT.parent / "advent"; out.mkdir(exist_ok=True)
     html_ = page("Advent calendar | 30 Products in 30 Days", "One door a day. Tear it open to reveal the product launched that day.",
-                 "/advent/", hero, main, extra_css=ADVENT_CSS, script=ADVENT_JS, wide=True)
+                 "/advent/", hero, main, extra_css=ADVENT_CSS, script=ADVENT_JS, wide=True, current="advent")
     (out / "index.html").write_text(html_.replace('og:type" content="article"', 'og:type" content="website"'), encoding="utf-8")
 
 def main():

@@ -1,0 +1,11 @@
+/* Site header menu. Uses the design-system tokens each page already defines. */
+.site-nav{background:var(--surface-card);border-bottom:var(--border-w) solid var(--outline);color:var(--ink)}
+.site-nav__in{max-width:1240px;margin:0 auto;padding:var(--space-2) var(--space-3);display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:var(--space-2) var(--space-4)}
+.site-nav__brand{display:inline-flex;align-items:center;gap:var(--space-2);min-height:44px;color:var(--ink);text-decoration:none;font:800 20px/1 var(--font-display,"Bricolage Grotesque","Arial Black",Arial,sans-serif);letter-spacing:-.5px}
+.site-nav__brand img{width:36px;height:36px;display:block}
+.site-nav__list{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:var(--space-2)}
+.site-nav__link{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:8px 18px;border:var(--border-w) solid var(--outline);border-radius:var(--radius-pill,999px);background:var(--surface-card);color:var(--ink);font:700 15px/1 var(--font-body,"DM Sans",Arial,sans-serif);text-decoration:none}
+.site-nav__link:hover{background:var(--brand-flamingo);color:#0F1B3D}
+.site-nav__link[aria-current="page"]{background:var(--brand-launch);color:#0F1B3D}
+.site-nav__link:focus-visible,.site-nav__brand:focus-visible{outline:3px solid var(--focus-ring);outline-offset:3px}
+@media (max-width:560px){.site-nav__brand span{display:none}}
