@@ -24,4 +24,7 @@ Every day gets its own launch post here, with a live demo link so you can try th
 - Join the challenge: [register here](https://30products30days.com/register.html)
 - Watch the [advent calendar](https://30products30days.com/advent/) for each day's door
 
+## My second West Tech Fest event
+This is the second West Tech Fest event I'm involved in. I'm also mentoring at the [Perth AI Builders Micro-Hackathon](https://www.westtechfest.com.au/satellite-events/perth-ai-builders-micro-hackathon) on Monday 7 December at Spacecubed Riff. It squeezes a full hackathon into one hour. Come and build something with us.
+
 Thanks to the West Tech Fest team for including us. Day 1 lands on Saturday!
