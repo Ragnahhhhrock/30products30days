@@ -89,6 +89,9 @@ gtag('config','G-FM1RLPT7RK');
   .panel__body p{margin:0}
   .panel__body h3{margin:0;font:800 20px/1.2 var(--font-display,"Bricolage Grotesque",Arial,sans-serif)}
   .muted{color:var(--ink-muted)}
+  .video-panel{padding:0;background:var(--brand-launch)}
+  .video-panel video{display:block;width:100%;height:auto;aspect-ratio:16/9;background:var(--brand-launch)}
+  section.watch{padding-top:var(--space-5)}
   .l30-btn{margin-top:var(--space-2)}
   .social-links{display:flex;flex-wrap:wrap;gap:var(--space-2)}
   /* Registration form (same styles as register.html) */
@@ -152,6 +155,17 @@ gtag('config','G-FM1RLPT7RK');
 </header>
 
 <main class="wrap">
+  <section class="watch">
+    <p class="label">Meet Mal</p>
+    <h2>Watch the 18-second intro</h2>
+    <div class="panel video-panel">
+      <video controls playsinline preload="metadata" poster="/media/promo-home-poster.jpg" aria-label="Mal explains the 30 Products 30 Days challenge, which starts Saturday 28 November.">
+        <source src="/media/promo-home.mp4" type="video/mp4">
+        <p>Your browser can't play this video. <a href="/media/promo-home.mp4">Download the intro (MP4)</a>.</p>
+      </video>
+    </div>
+  </section>
+
   <section>
     <p class="label">What counts</p>
     <h2>The challenge</h2>
