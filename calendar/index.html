@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-FM1RLPT7RK"></script>
+<script>
+window.dataLayer=window.dataLayer||[];
+function gtag(){dataLayer.push(arguments);}
+gtag('js',new Date());
+gtag('config','G-FM1RLPT7RK');
+</script>
+<script src="/analytics.js" defer></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Advent calendar | 30 Products in 30 Days</title>
+<meta name="description" content="A participant's 30 Products in 30 Days advent calendar.">
+
+<meta name="theme-color" content="#FFD21F">
+<link rel="canonical" href="https://30products30days.com/calendar/">
+<meta property="og:title" content="Advent calendar">
+<meta property="og:description" content="A participant's 30 Products in 30 Days advent calendar.">
+<meta property="og:url" content="https://30products30days.com/calendar/">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://30products30days.com/social/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="stylesheet" href="/design-system/components/bundle.css">
+<link rel="stylesheet" href="/site-nav.css">
+<link rel="stylesheet" href="/participants/p.css">
+</head>
+<body>
+<header class="site-nav" id="nav"></header>
+<header class="hero hero--advent"><div class="wrap">
+  <p class="label" id="kicker">28 Nov to 27 Dec 2026</p>
+  <h1 id="title">Advent <mark>calendar</mark></h1>
+  <p class="lead" id="lead">Loading</p>
+  <div class="l30-progress" role="progressbar" aria-valuemin="0" aria-valuemax="30" aria-valuenow="0" id="prog" hidden>
+    <div class="l30-progress__label" id="progLabel"></div>
+    <div class="l30-progress__track"><div class="l30-progress__fill" id="progFill" style="width:0%"></div></div>
+  </div>
+</div></header>
+<main class="wrap wrap--wide" style="padding-top:var(--space-5);padding-bottom:var(--space-6)" id="main"></main>
+<footer><div class="wrap"><img src="/brand/logos/launch-badge.svg" alt="" width="32" height="32"><span>&copy; 2026 30products30days.com</span><a href="/">Home</a><a href="/community/">Community</a><a href="/advent/">Advent calendar</a></div></footer>
+<script src="/participants/p.js"></script>
+<script>
+(function () {
+  var q = new URLSearchParams(location.search), u = (q.get("u") || "").toLowerCase(), dayQ = parseInt(q.get("day"), 10);
+  var main = document.getElementById("main"), E = L30.esc;
+  L30.nav("community");
+  function setText(id, t) { document.getElementById(id).textContent = t; }
+  if (!/^[a-z0-9-]{3,24}$/.test(u)) { setText("lead", "Pick someone from the community."); main.innerHTML = '<div class="nodata"><a class="l30-btn l30-btn--primary" href="/community/">See the community</a></div>'; return; }
+  L30.api("/api/public/u/" + u).then(function (r) {
+    if (r.status === 404) { setText("lead", "We couldn't find that calendar."); main.innerHTML = '<div class="nodata"><a class="l30-btn l30-btn--primary" href="/community/">See the community</a></div>'; return; }
+    if (!r.ok) { setText("lead", "Couldn't load this calendar. Refresh to try again."); return; }
+    var p = r.data.profile, today = r.data.today_day, byDay = {};
+    r.data.entries.forEach(function (e) { byDay[e.day] = e; });
+    document.title = p.display_name + " | 30 Products in 30 Days";
+    setText("kicker", "Participant");
+    document.getElementById("title").innerHTML = E(p.display_name) + "<br><mark>advent calendar</mark>";
+    setText("lead", p.bio || "One product a day for thirty days.");
+    var shipped = r.data.entries.length, pr = document.getElementById("prog");
+    pr.hidden = false; pr.setAttribute("aria-valuenow", shipped); pr.setAttribute("aria-label", shipped + " of 30 shipped");
+    setText("progLabel", shipped + " OF 30 SHIPPED");
+    document.getElementById("progFill").style.width = (shipped / 30 * 100).toFixed(1) + "%";
+
+    // one post view
+    if (dayQ >= 1 && dayQ <= 30 && byDay[dayQ]) {
+      var e = byDay[dayQ], d = L30.dayDate(dayQ);
+      document.title = "Day " + (dayQ < 10 ? "0" : "") + dayQ + ": " + e.product_name + " | " + p.display_name;
+      main.innerHTML = '<div class="row" style="margin-bottom:var(--space-4)">' + L30.badge(dayQ, 72) + '<div><span class="l30-tag l30-tag--shipped">' + E(e.type) + "</span><h2 style=\"margin:8px 0 0\">" + E(e.product_name) + "</h2><p class=\"help\">" + d.label + " 2026 by " + E(p.display_name) + "</p></div></div>" +
+        (e.image ? '<img class="cover" src="' + E(L30.img(e.image)) + '" alt="' + E(e.product_name) + '" style="margin-bottom:var(--space-4)">' : "") +
+        '<p class="lead">' + E(e.pitch) + '</p><div class="post">' + L30.md(e.body) + "</div>" +
+        '<article class="l30-card" style="margin-top:var(--space-5)"><header class="l30-card__head"><span class="l30-card__day">Day ' + (dayQ < 10 ? "0" : "") + dayQ + '</span><span class="l30-card__type">' + E(e.type) + '</span></header><div class="l30-card__body"><h3 class="l30-card__title">' + E(e.product_name) + '</h3><p class="l30-card__text">' + E(e.pitch) + '</p><div class="l30-card__foot"><b class="l30-card__price">' + E(e.price) + '</b><a class="l30-btn l30-btn--primary" href="' + E(e.product_url) + '" rel="noopener nofollow ugc">Grab it</a></div></div></article>' +
+        '<div class="actions"><a class="l30-btn l30-btn--secondary" href="/calendar/?u=' + u + '">Back to the calendar</a></div>';
+      return;
+    }
+    var doors = ""; for (var n = 1; n <= 30; n++) doors += L30.door(n, byDay[n] || null, today, "/calendar/?u=" + u);
+    main.innerHTML = '<ol class="doors" aria-label="Advent calendar">' + doors + "</ol>";
+    L30.wireDoors(u);
+  });
+})();
+</script>
+</body>
+</html>

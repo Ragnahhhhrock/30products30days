@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-FM1RLPT7RK"></script>
+<script>
+window.dataLayer=window.dataLayer||[];
+function gtag(){dataLayer.push(arguments);}
+gtag('js',new Date());
+gtag('config','G-FM1RLPT7RK');
+</script>
+<script src="/analytics.js" defer></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admin | 30 Products in 30 Days</title>
+<meta name="description" content="Organiser tools.">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#FFD21F">
+<link rel="canonical" href="https://30products30days.com/admin/">
+<meta property="og:title" content="Admin">
+<meta property="og:description" content="Organiser tools.">
+<meta property="og:url" content="https://30products30days.com/admin/">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://30products30days.com/social/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="stylesheet" href="/design-system/components/bundle.css">
+<link rel="stylesheet" href="/site-nav.css">
+<link rel="stylesheet" href="/participants/p.css">
+</head>
+<body>
+<header class="site-nav" id="nav"></header>
+<main class="wrap wrap--form" style="padding-top:var(--space-5);padding-bottom:var(--space-6)">
+  <p class="label">Organiser</p>
+  <h1>Admin</h1>
+  <div id="gate" class="status err" style="display:none" role="alert">Sign in as an organiser on the <a href="/account/">account page</a> first.</div>
+  <div id="adm" class="stack" hidden>
+    <section class="panel"><div class="panel__head">Approve registrants</div>
+      <form id="addForm" novalidate>
+        <div class="field"><label for="emails">Emails <span class="hint">one per line or comma separated. Only approved addresses can sign in.</span></label><textarea id="emails" class="tall"></textarea></div>
+        <button type="submit" class="l30-btn l30-btn--primary">Approve these</button>
+        <div class="status" id="addMsg" role="status" aria-live="polite"></div>
+      </form></section>
+    <section class="panel"><div class="panel__head">Participants</div><div class="panel__body" style="overflow-x:auto">
+      <table class="tbl"><thead><tr><th>Name</th><th>Email</th><th>Posts</th><th>Status</th></tr></thead><tbody id="pt"></tbody></table></div></section>
+    <section class="panel"><div class="panel__head">Recent posts</div><div class="panel__body" style="overflow-x:auto">
+      <table class="tbl"><thead><tr><th>Day</th><th>Product</th><th>By</th><th>Visible</th></tr></thead><tbody id="et"></tbody></table></div></section>
+  </div>
+</main>
+<script src="/participants/p.js"></script>
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); }, E = L30.esc;
+  L30.nav("account");
+  function gate() { $("gate").style.display = "block"; }
+  function loadP() {
+    L30.api("/api/admin/participants").then(function (r) {
+      if (r.status === 401 || r.status === 403) return gate();
+      $("adm").hidden = false;
+      $("pt").innerHTML = r.data.participants.map(function (p) {
+        var sus = p.status === "suspended";
+        return "<tr><td>" + E(p.display_name || "Not set up") + (p.username ? "<br><a href=\"/calendar/?u=" + E(p.username) + "\">" + E(p.username) + "</a>" : "") + "</td><td>" + E(p.email) + "</td><td>" + p.published + "</td><td><button class=\"l30-btn l30-btn--secondary\" data-id=\"" + p.id + "\" data-s=\"" + (sus ? "approved" : "suspended") + "\">" + (sus ? "Suspended: restore" : "Approved: suspend") + "</button></td></tr>";
+      }).join("") || "<tr><td colspan=4>No participants yet.</td></tr>";
+    });
+  }
+  function loadE() {
+    L30.api("/api/admin/entries").then(function (r) {
+      if (!r.ok) return;
+      $("et").innerHTML = r.data.entries.map(function (e) {
+        return "<tr><td>" + e.day + "</td><td>" + E(e.product_name) + "<br><span class=\"help\">" + E(e.pitch) + "</span></td><td>" + E(e.display_name || e.username) + "</td><td><button class=\"l30-btn l30-btn--secondary\" data-eid=\"" + e.id + "\" data-h=\"" + (e.hidden ? 0 : 1) + "\">" + (e.hidden ? "Hidden: show" : "Shown: hide") + "</button></td></tr>";
+      }).join("") || "<tr><td colspan=4>No posts yet.</td></tr>";
+    });
+  }
+  $("addForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var list = $("emails").value.split(/[\s,;]+/).filter(Boolean);
+    L30.api("/api/admin/participants", { method: "POST", json: { emails: list } }).then(function (r) {
+      if (!r.ok) return L30.status($("addMsg"), "That didn't save.", "err");
+      L30.status($("addMsg"), r.data.added + " added, " + r.data.skipped + " already there or invalid.", "ok"); $("emails").value = ""; loadP();
+    });
+  });
+  $("pt").addEventListener("click", function (e) {
+    var b = e.target.closest("button[data-id]"); if (!b) return;
+    L30.api("/api/admin/participants/" + b.dataset.id, { method: "PATCH", json: { status: b.dataset.s } }).then(loadP);
+  });
+  $("et").addEventListener("click", function (e) {
+    var b = e.target.closest("button[data-eid]"); if (!b) return;
+    L30.api("/api/admin/entries/" + b.dataset.eid, { method: "PATCH", json: { hidden: b.dataset.h === "1" } }).then(loadE);
+  });
+  if (!L30.session()) gate(); else { loadP(); loadE(); }
+})();
+</script>
+</body>
+</html>

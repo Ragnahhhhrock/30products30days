@@ -115,7 +115,7 @@ CSS = """
   @media (prefers-reduced-motion:reduce){.item{transition:none}.item:hover{transform:none}}
 """
 
-NAV_ITEMS = [('home', '/', 'Home'), ('blog', '/blog/', 'Blog'), ('advent', '/advent/', 'Advent calendar'), ('join', '/register.html', 'Join'), ('contact', '/#cf', 'Contact')]
+NAV_ITEMS = [('home', '/', 'Home'), ('blog', '/blog/', 'Blog'), ('advent', '/advent/', 'Advent calendar'), ('community', '/community/', 'Community'), ('account', '/account/', 'My account'), ('join', '/register.html', 'Join'), ('contact', '/#cf', 'Contact')]
 
 def nav(cur):
     li = "".join(f'<li><a class="site-nav__link" href="{h}"{" aria-current=" + chr(34) + "page" + chr(34) if k == cur else ""}>{t}</a></li>' for k, h, t in NAV_ITEMS)

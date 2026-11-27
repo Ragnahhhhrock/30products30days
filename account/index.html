@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-FM1RLPT7RK"></script>
+<script>
+window.dataLayer=window.dataLayer||[];
+function gtag(){dataLayer.push(arguments);}
+gtag('js',new Date());
+gtag('config','G-FM1RLPT7RK');
+</script>
+<script src="/analytics.js" defer></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>My account | 30 Products in 30 Days</title>
+<meta name="description" content="Sign in to publish your daily product post.">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#FFD21F">
+<link rel="canonical" href="https://30products30days.com/account/">
+<meta property="og:title" content="My account">
+<meta property="og:description" content="Sign in to publish your daily product post.">
+<meta property="og:url" content="https://30products30days.com/account/">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://30products30days.com/social/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="stylesheet" href="/design-system/components/bundle.css">
+<link rel="stylesheet" href="/site-nav.css">
+<link rel="stylesheet" href="/participants/p.css">
+</head>
+<body>
+<header class="site-nav" id="nav"></header>
+<main class="wrap wrap--form" style="padding-top:var(--space-5);padding-bottom:var(--space-6)">
+  <p class="label" id="kicker">Participants</p>
+  <h1>Your <mark>30</mark> days</h1>
+  <p class="lead" id="lead">Sign in with the email you registered with. We send a one-time link, so there is no password.</p>
+
+  <div id="loading" class="status ok" role="status" style="display:block">Loading</div>
+
+  <!-- sign in -->
+  <section class="panel" id="loginPanel" hidden>
+    <div class="panel__head">Sign in</div>
+    <form id="loginForm" novalidate>
+      <div class="field"><label for="email">Email</label><input type="email" id="email" autocomplete="email" required></div>
+      <div class="cf-turnstile" data-sitekey="0x4AAAAAAGF6g2TF2JRMYtWo"></div>
+      <button type="submit" class="l30-btn l30-btn--primary" id="loginGo">Email me a link</button>
+      <div class="status" id="loginMsg" role="status" aria-live="polite"></div>
+      <p class="help">Not registered yet? <a href="/register.html">Join the challenge</a>. We approve participants before they can sign in.</p>
+    </form>
+  </section>
+
+  <!-- profile -->
+  <section class="panel" id="profilePanel" hidden>
+    <div class="panel__head">Your profile</div>
+    <form id="profileForm" novalidate>
+      <div class="field"><label for="dn">Display name</label><input type="text" id="dn" maxlength="60" autocomplete="name"></div>
+      <div class="field"><label for="un">Username <span class="hint">3 to 24 letters, numbers or hyphens. This is your calendar address.</span></label><input type="text" id="un" maxlength="24" autocapitalize="none" spellcheck="false"></div>
+      <div class="field"><label for="bio">Short bio <span class="hint">optional</span></label><textarea id="bio" maxlength="300"></textarea></div>
+      <button type="submit" class="l30-btn l30-btn--primary" id="profileGo">Save profile</button>
+      <div class="status" id="profileMsg" role="status" aria-live="polite"></div>
+    </form>
+  </section>
+
+  <!-- dashboard -->
+  <div id="dash" class="stack" hidden>
+    <section class="panel">
+      <div class="panel__head" id="dashHead">Your calendar</div>
+      <div class="panel__body stack">
+        <div class="l30-progress" role="progressbar" aria-valuemin="0" aria-valuemax="30" aria-valuenow="0" id="prog">
+          <div class="l30-progress__label" id="progLabel">0 OF 30 SHIPPED</div>
+          <div class="l30-progress__track"><div class="l30-progress__fill" id="progFill" style="width:0%"></div></div>
+        </div>
+        <ul class="days" id="days" aria-label="Pick a day"></ul>
+        <div class="row">
+          <a class="l30-btn l30-btn--secondary" id="viewCal" href="#">View my public calendar</a>
+          <button type="button" class="l30-btn l30-btn--secondary" id="editProfile">Edit profile</button>
+          <a class="l30-btn l30-btn--secondary" href="/admin/" id="adminLink" hidden>Admin</a>
+          <button type="button" class="l30-btn l30-btn--secondary" id="signOut">Sign out</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" id="entryPanel">
+      <div class="panel__head" id="entryHead">Day 01</div>
+      <form id="entryForm" novalidate>
+        <p class="help" id="entryNote"></p>
+        <div class="field"><label for="pn">Product name</label><input type="text" id="pn" maxlength="80"></div>
+        <div class="field"><label for="pitch">One-line pitch <span class="hint">what it is and who it is for, 140 characters</span></label><input type="text" id="pitch" maxlength="140"></div>
+        <div class="cols">
+          <div class="field"><label for="purl">Product link <span class="hint">https only</span></label><input type="url" id="purl" placeholder="https://" maxlength="300"></div>
+          <div class="field"><label for="price">Price <span class="hint">Free or $9</span></label><input type="text" id="price" maxlength="30"></div>
+        </div>
+        <fieldset class="field"><legend>Type</legend>
+          <div class="opts">
+            <label><input type="radio" name="ptype" value="Digital" checked><span>Digital</span></label>
+            <label><input type="radio" name="ptype" value="Physical"><span>Physical</span></label>
+            <label><input type="radio" name="ptype" value="Service"><span>Service</span></label>
+          </div>
+        </fieldset>
+        <div class="field"><label for="body">Your post <span class="hint">## heading, - list item, **bold**, [text](https://link)</span></label><textarea id="body" class="tall" maxlength="8000"></textarea></div>
+        <div class="field"><label for="imgFile">Product image <span class="hint">PNG, JPG or WebP, 2 MB or less. Save first, then add the image.</span></label>
+          <input type="file" id="imgFile" accept="image/png,image/jpeg,image/webp">
+          <img id="thumb" class="thumb" alt="" hidden>
+        </div>
+        <div class="row">
+          <button type="button" class="l30-btn l30-btn--secondary" id="saveDraft">Save draft</button>
+          <button type="submit" class="l30-btn l30-btn--primary" id="publish">Publish</button>
+        </div>
+        <div class="status" id="entryMsg" role="status" aria-live="polite"></div>
+      </form>
+    </section>
+  </div>
+</main>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+<script src="/participants/p.js"></script>
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var state = { me: null, entries: {}, today: 0, day: 1 };
+  L30.nav("account");
+
+  function show(which) {
+    ["loginPanel", "profilePanel", "dash"].forEach(function (id) { $(id).hidden = id !== which; });
+    $("loading").style.display = "none";
+  }
+  function pad(n) { return (n < 10 ? "0" : "") + n; }
+
+  // ---- sign in ----
+  $("loginForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var email = $("email").value.trim(), tk = document.querySelector('[name="cf-turnstile-response"]');
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return L30.status($("loginMsg"), "Add a valid email address.", "err");
+    if (!tk || !tk.value) return L30.status($("loginMsg"), "Wait for the check to finish, then try again.", "err");
+    $("loginGo").disabled = true;
+    L30.api("/api/login", { method: "POST", json: { email: email, token: tk.value } }).then(function (r) {
+      $("loginGo").disabled = false;
+      if (window.turnstile) turnstile.reset();
+      if (r.ok) L30.status($("loginMsg"), "Check your inbox. If " + email + " is registered and approved, a link is on its way. It expires in 15 minutes.", "ok");
+      else if (r.status === 429) L30.status($("loginMsg"), "Too many tries. Wait a little, then try again.", "err");
+      else L30.status($("loginMsg"), "That didn't send. Try again in a moment.", "err");
+    });
+  });
+
+  // ---- profile ----
+  function fillProfile() { $("dn").value = state.me.display_name || ""; $("un").value = state.me.username || ""; $("bio").value = state.me.bio || ""; }
+  $("profileForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+    $("profileGo").disabled = true;
+    L30.api("/api/me", { method: "PUT", json: { display_name: $("dn").value, username: $("un").value.toLowerCase(), bio: $("bio").value } }).then(function (r) {
+      $("profileGo").disabled = false;
+      if (!r.ok) return L30.status($("profileMsg"), r.data.error || "That didn't save. Try again.", "err");
+      load();
+    });
+  });
+  $("editProfile").addEventListener("click", function () { fillProfile(); show("profilePanel"); });
+  $("signOut").addEventListener("click", function () { L30.api("/api/logout", { method: "POST" }).then(function () { L30.setSession(null); location.href = "/account/"; }); });
+
+  // ---- dashboard ----
+  function renderDays() {
+    var html = "", shipped = 0;
+    for (var n = 1; n <= 30; n++) {
+      var e = state.entries[n], cls = "daybtn", tag = "Open";
+      if (e && e.status === "published") { cls += " daybtn--shipped"; tag = n <= state.today ? "Live" : "Set"; if (n <= state.today && !e.hidden) shipped++; }
+      else if (e) { cls += " daybtn--draft"; tag = "Draft"; }
+      else if (n > state.today) { cls += " daybtn--future"; tag = L30.dayDate(n).label; }
+      html += '<li><button type="button" class="' + cls + '" data-day="' + n + '" aria-pressed="' + (n === state.day) + '" aria-label="Day ' + n + ", " + tag + '">' + pad(n) + "<small>" + tag + "</small></button></li>";
+    }
+    $("days").innerHTML = html;
+    $("progLabel").textContent = shipped + " OF 30 SHIPPED";
+    $("progFill").style.width = (shipped / 30 * 100).toFixed(1) + "%";
+    $("prog").setAttribute("aria-valuenow", shipped); $("prog").setAttribute("aria-label", shipped + " of 30 shipped");
+  }
+  $("days").addEventListener("click", function (e) {
+    var b = e.target.closest("button[data-day]"); if (!b) return;
+    state.day = +b.dataset.day; renderDays(); fillEntry();
+  });
+  function fillEntry() {
+    var n = state.day, e = state.entries[n] || {}, d = L30.dayDate(n);
+    $("entryHead").textContent = "Day " + pad(n) + ", " + d.label;
+    $("pn").value = e.product_name || ""; $("pitch").value = e.pitch || ""; $("purl").value = e.product_url || "";
+    $("price").value = e.price || ""; $("body").value = e.body || "";
+    document.querySelectorAll('input[name="ptype"]').forEach(function (r) { r.checked = r.value === (e.type || "Digital"); });
+    var t = $("thumb"); if (e.image) { t.src = L30.img(e.image); t.alt = "Current product image"; t.hidden = false; } else { t.hidden = true; t.removeAttribute("src"); }
+    $("imgFile").value = "";
+    var note = n > state.today ? "Day " + n + " opens on " + d.label + ". You can publish ahead: it stays hidden until that date." : (e.status === "published" ? "This day is live. Edits show straight away." : "Publish to open this door on your calendar.");
+    if (e.hidden) note = "An organiser has hidden this post. Contact us if you think that's a mistake.";
+    $("entryNote").textContent = note;
+    $("entryMsg").className = "status";
+  }
+  function entryPayload(publish) {
+    var t = document.querySelector('input[name="ptype"]:checked');
+    return { product_name: $("pn").value, pitch: $("pitch").value, product_url: $("purl").value, price: $("price").value, type: t ? t.value : "Digital", body: $("body").value, publish: publish };
+  }
+  function save(publish) {
+    $("saveDraft").disabled = true; $("publish").disabled = true;
+    return L30.api("/api/entry/" + state.day, { method: "PUT", json: entryPayload(publish) }).then(function (r) {
+      $("saveDraft").disabled = false; $("publish").disabled = false;
+      if (!r.ok) { L30.status($("entryMsg"), r.data.error || "That didn't save. Try again.", "err"); return false; }
+      state.entries[state.day] = r.data.entry; renderDays(); fillEntry();
+      L30.status($("entryMsg"), publish ? (r.data.reveals_today ? "Published. Your door is open." : "Saved. Your door opens on " + L30.dayDate(state.day).label + ".") : "Draft saved.", "ok");
+      if (window.track) track(publish ? "entry_publish" : "entry_draft", { challenge_day: state.day });
+      return true;
+    });
+  }
+  $("saveDraft").addEventListener("click", function () { save(false); });
+  $("entryForm").addEventListener("submit", function (e) { e.preventDefault(); save(true); });
+  $("imgFile").addEventListener("change", function () {
+    var f = this.files[0]; if (!f) return;
+    if (!state.entries[state.day]) return L30.status($("entryMsg"), "Save a draft first, then add the image.", "err");
+    if (f.size > 2 * 1024 * 1024) return L30.status($("entryMsg"), "Image must be 2 MB or smaller.", "err");
+    L30.status($("entryMsg"), "Uploading image", "ok");
+    L30.api("/api/entry/" + state.day + "/image", { method: "POST", body: f, headers: { "Content-Type": f.type } }).then(function (r) {
+      if (!r.ok) return L30.status($("entryMsg"), r.data.error || "Image didn't upload.", "err");
+      state.entries[state.day].image = r.data.image; fillEntry(); L30.status($("entryMsg"), "Image added.", "ok");
+    });
+  });
+
+  function load() {
+    L30.api("/api/me").then(function (r) {
+      if (r.status === 401) { L30.setSession(null); return show("loginPanel"); }
+      if (!r.ok) { $("loading").textContent = "Couldn't load your account. Refresh to try again."; $("loading").className = "status err"; return; }
+      state.me = r.data.profile; state.today = r.data.today_day;
+      state.entries = {}; r.data.entries.forEach(function (e) { state.entries[e.day] = e; });
+      if (!state.me.username) { $("lead").textContent = "Pick your name and calendar address to get started."; fillProfile(); return show("profilePanel"); }
+      $("lead").textContent = "Publish one product post a day. Each one opens a door on your own advent calendar.";
+      $("dashHead").textContent = state.me.display_name;
+      $("viewCal").href = "/calendar/?u=" + encodeURIComponent(state.me.username);
+      $("adminLink").hidden = !state.me.is_admin;
+      state.day = Math.min(30, Math.max(1, state.today));
+      renderDays(); fillEntry(); show("dash");
+    });
+  }
+
+  // ---- start: exchange a link token if present, then load ----
+  var m = location.hash.match(/[#&]t=([A-Za-z0-9_-]{20,100})/);
+  if (m) {
+    history.replaceState(null, "", location.pathname);
+    L30.api("/api/session", { method: "POST", json: { token: m[1] } }).then(function (r) {
+      if (r.ok) { L30.setSession(r.data.session); load(); }
+      else { show("loginPanel"); L30.status($("loginMsg"), "That link has expired or was already used. Request a new one.", "err"); }
+    });
+  } else if (L30.session()) load(); else show("loginPanel");
+})();
+</script>
+</body>
+</html>

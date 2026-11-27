@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-FM1RLPT7RK"></script>
+<script>
+window.dataLayer=window.dataLayer||[];
+function gtag(){dataLayer.push(arguments);}
+gtag('js',new Date());
+gtag('config','G-FM1RLPT7RK');
+</script>
+<script src="/analytics.js" defer></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Community | 30 Products in 30 Days</title>
+<meta name="description" content="Everyone taking part in 30 Products in 30 Days, and the advent calendar each one is filling.">
+
+<meta name="theme-color" content="#FFD21F">
+<link rel="canonical" href="https://30products30days.com/community/">
+<meta property="og:title" content="Community">
+<meta property="og:description" content="Everyone taking part in 30 Products in 30 Days, and the advent calendar each one is filling.">
+<meta property="og:url" content="https://30products30days.com/community/">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://30products30days.com/social/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="stylesheet" href="/design-system/components/bundle.css">
+<link rel="stylesheet" href="/site-nav.css">
+<link rel="stylesheet" href="/participants/p.css">
+</head>
+<body>
+<header class="site-nav" id="nav"></header>
+<header class="hero"><div class="wrap"><div class="hero__text">
+  <p class="label">The community</p>
+  <h1>Everyone building, <mark>one door</mark> a day</h1>
+  <p class="lead">Each participant has their own advent calendar. Open a door to see what they shipped.</p>
+</div></div></header>
+<main class="wrap wrap--wide" style="padding-top:var(--space-5);padding-bottom:var(--space-6)">
+  <ul class="people" id="people"><li class="nodata">Loading</li></ul>
+  <div class="actions"><a class="l30-btn l30-btn--primary" href="/account/">Sign in to publish</a><a class="l30-btn l30-btn--secondary" href="/register.html">Join the challenge</a></div>
+</main>
+<footer><div class="wrap"><img src="/brand/logos/launch-badge.svg" alt="" width="32" height="32"><span>&copy; 2026 30products30days.com</span><a href="/">Home</a><a href="/blog/">Blog</a><a href="/advent/">Advent calendar</a></div></footer>
+<script src="/participants/p.js"></script>
+<script>
+(function () {
+  L30.nav("community");
+  var ul = document.getElementById("people");
+  L30.api("/api/public/participants").then(function (r) {
+    if (!r.ok) { ul.innerHTML = '<li class="nodata">Couldn\'t load the community. Refresh to try again.</li>'; return; }
+    var list = r.data.participants;
+    if (!list.length) { ul.innerHTML = '<li class="nodata"><strong>Calendars appear here as participants set up their profiles.</strong> Day 1 is 28 November 2026.</li>'; return; }
+    ul.innerHTML = list.map(function (p) {
+      return '<li><a class="person" href="/calendar/?u=' + encodeURIComponent(p.username) + '"><h2>' + L30.esc(p.display_name) + "</h2><p>" + p.shipped + " of 30 shipped</p></a></li>";
+    }).join("");
+  });
+})();
+</script>
+</body>
+</html>

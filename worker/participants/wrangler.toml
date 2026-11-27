@@ -1,0 +1,17 @@
+name = "30p30d-participants"
+main = "index.js"
+compatibility_date = "2026-11-01"
+
+# Cloudflare Email Service sending binding (domain 30products30days.com must be onboarded for sending; needs Workers Paid for arbitrary recipients).
+send_email = [{ name = "EMAIL" }]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "30p30d-participants"
+database_id = "REPLACE_WITH_D1_ID"   # printed by: npx wrangler d1 create 30p30d-participants
+
+[[r2_buckets]]
+binding = "IMAGES"
+bucket_name = "30p30d-participant-images"
+
+# Secrets: wrangler secret put TURNSTILE_SECRET ; wrangler secret put ADMIN_EMAILS (comma separated)
