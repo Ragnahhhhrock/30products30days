@@ -7,7 +7,7 @@ Powers `/account/`, `/calendar/?u=<username>`, `/community/` and `/admin/`. Appr
 2. `npx wrangler d1 execute 30p30d-participants --remote --file=schema.sql`
 3. `npx wrangler r2 bucket create 30p30d-participant-images`
 4. Onboard `30products30days.com` for sending in Cloudflare Email Service (Workers Paid is needed to email arbitrary recipients). Sign-in emails go out as `contact@30products30days.com`.
-5. `npx wrangler secret put TURNSTILE_SECRET` and `npx wrangler secret put ADMIN_EMAILS` (comma separated organiser emails).
+5. `npx wrangler secret put TURNSTILE_SECRET`; organiser emails are the `ADMIN_EMAILS` var in `wrangler.toml`.
 6. `npx wrangler deploy`. If the workers.dev URL differs from `30p30d-participants.malgordonperth.workers.dev`, update `API` in `participants/p.js`.
 7. Sign in at `/account/` with an organiser email, open `/admin/`, and paste the registrant emails to approve them.
 

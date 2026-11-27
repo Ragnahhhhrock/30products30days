@@ -14,4 +14,7 @@ database_id = "c852b8ca-0a5f-4171-9706-c4a3ece184d1"
 binding = "IMAGES"
 bucket_name = "30p30d-participant-images"
 
-# Secrets: wrangler secret put TURNSTILE_SECRET ; wrangler secret put ADMIN_EMAILS (comma separated)
+[vars]
+ADMIN_EMAILS = "contact@30products30days.com"   # comma separated organiser emails
+
+# Secret (set in the dashboard): TURNSTILE_SECRET
