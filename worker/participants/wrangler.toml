@@ -8,7 +8,7 @@ send_email = [{ name = "EMAIL" }]
 [[d1_databases]]
 binding = "DB"
 database_name = "30p30d-participants"
-database_id = "REPLACE_WITH_D1_ID"   # printed by: npx wrangler d1 create 30p30d-participants
+database_id = "c852b8ca-0a5f-4171-9706-c4a3ece184d1"
 
 [[r2_buckets]]
 binding = "IMAGES"
