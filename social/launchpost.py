@@ -24,9 +24,9 @@ def blog_url(meta):
     return f"{SITE}/blog/{meta['slug']}/"
 
 def day_label(meta):
-    """"Day 01 of 29" (30 minus the day = days remaining); the last day reads "Day 30: final day"."""
+    """"Day 01 of 30" (day number of the 30-day total)."""
     n = meta["day"]
-    return "Day 30: final day" if n >= 30 else f"Day {n:02d} of {30 - n}"
+    return f"Day {n:02d} of 30"
 
 def caption(meta, platform):
     """Daily caption in the design-system voice, ending with the blog post link for this launch.
