@@ -4,6 +4,9 @@ Run this for every new product launch (one per day, Day 1 = 28 Nov 2026, Perth t
 
 Inputs needed: day number, product name, type (Digital / Physical / Service), one-sentence summary, price, product URL.
 
+## 0. Badge
+Before launch, make sure the product's page carries the challenge badge (snippets under "Challenge badge" in `CLAUDE.md`).
+
 ## 1. Blog post
 - Create `blog/posts/day-NN-product-name.md` with front matter (`day`, `title`, `type`, `date`, `summary`, `price`, `link`). Format and voice: see `blog/README.md`.
 - Replace every `{{placeholder}}`, then run `python3 blog/build.py`.
@@ -37,6 +40,7 @@ Pushing the blog post to `main` also runs `.github/workflows/sync-participant.ym
 Commit the blog post, advent entry and thumbnail, and push to `main` on this repo. This push triggers the social posts.
 
 ## Checklist
+- [ ] Challenge badge on the product page
 - [ ] Blog post built, no placeholders
 - [ ] Advent thumbnail + link + `data-post="1"`
 - [ ] Social workflow run succeeded (Instagram, Facebook, LinkedIn)
