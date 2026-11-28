@@ -2,6 +2,10 @@
 
 Read `design-system/README.md` and `design-system/tokens.json` before building anything. Nothing ships that does not conform to them.
 
+## Product launches
+
+For every new product launch, follow `LAUNCH_WORKFLOW.md` (blog post, advent calendar entry, Instagram post, Facebook post).
+
 ## Advent calendar entries (`advent/index.html`)
 
 Whenever you create or fill an advent calendar entry (a `.door` for a given day), do both of these, every time:
