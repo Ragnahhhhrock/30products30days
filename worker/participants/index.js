@@ -159,6 +159,17 @@ export default {
         ).bind(td).all();
         return json({ today_day: td, participants: rows.results.map(({ avatar_key, ...r }) => ({ ...r, avatar: imgUrl(avatar_key) })) }, 200, o);
       }
+      if (request.method === "GET" && path === "/api/public/latest") {
+        const td = todayDay();
+        const lim = Math.min(Math.max(parseInt(url.searchParams.get("limit"), 10) || 6, 1), 12);
+        const rows = await env.DB.prepare(
+          `SELECT p.username, p.display_name, p.avatar_key, e.day, e.product_name, e.pitch, e.type, e.price, e.updated_at
+           FROM entries e JOIN participants p ON p.id=e.participant_id
+           WHERE e.status='published' AND e.hidden=0 AND e.day<=? AND p.status='approved' AND p.username IS NOT NULL
+           ORDER BY e.day DESC, e.updated_at DESC LIMIT ?`
+        ).bind(td, lim).all();
+        return json({ today_day: td, posts: rows.results.map(({ avatar_key, ...r }) => ({ ...r, avatar: imgUrl(avatar_key) })) }, 200, o);
+      }
       let m = path.match(/^\/api\/public\/u\/([a-z0-9-]{3,24})$/);
       if (request.method === "GET" && m) {
         const td = todayDay();
