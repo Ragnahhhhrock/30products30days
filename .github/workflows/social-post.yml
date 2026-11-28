@@ -3,8 +3,8 @@ name: Post launch to social
 # When a launch blog post lands on main, render the square image, then post it
 # to the 30products30days Instagram account and Facebook page.
 # Posts through Buffer (same account as the other autoposters).
-# Needs: secret BUFFER_API_KEY; variables BUFFER_INSTAGRAM_CHANNEL and BUFFER_FACEBOOK_CHANNEL
-# (channel id or exact name; run this workflow with dry_run to list the channels). BUFFER_ORGANIZATION_ID is optional.
+# Needs: secret BUFFER_API_KEY. Channel ids default to the 30products30days Instagram and Facebook
+# channels; override with variables BUFFER_INSTAGRAM_CHANNEL / BUFFER_FACEBOOK_CHANNEL. BUFFER_ORGANIZATION_ID is optional.
 on:
   push:
     branches: [main]
@@ -85,8 +85,8 @@ jobs:
         env:
           BUFFER_API_KEY: ${{ secrets.BUFFER_API_KEY }}
           BUFFER_ORGANIZATION_ID: ${{ vars.BUFFER_ORGANIZATION_ID }}
-          BUFFER_INSTAGRAM_CHANNEL: ${{ vars.BUFFER_INSTAGRAM_CHANNEL }}
-          BUFFER_FACEBOOK_CHANNEL: ${{ vars.BUFFER_FACEBOOK_CHANNEL }}
+          BUFFER_INSTAGRAM_CHANNEL: ${{ vars.BUFFER_INSTAGRAM_CHANNEL || '6b0a78a18541f09ecbcf5144' }}  # 30products30days Instagram
+          BUFFER_FACEBOOK_CHANNEL: ${{ vars.BUFFER_FACEBOOK_CHANNEL || '6b0a790d8541f09ecbcf53dc' }}  # 30 Products in 30 Days Facebook page
           BUFFER_MODE: ${{ vars.BUFFER_MODE }}
           REPO: ${{ github.repository }}
         run: |

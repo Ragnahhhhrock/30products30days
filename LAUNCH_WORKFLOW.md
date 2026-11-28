@@ -28,7 +28,7 @@ Pushing the blog post to `main` triggers `.github/workflows/social-post.yml`, wh
   ```
 - records the result in `social/posted.json`, so a rerun never double-posts.
 
-Before pushing, preview the image: `python3 social/render.py blog/posts/day-NN-name.md out.png`. Check the run in the repo's Actions tab after the push. Requires secret `BUFFER_API_KEY` and variables `BUFFER_INSTAGRAM_CHANNEL`, `BUFFER_FACEBOOK_CHANNEL`. Test without posting via the workflow's manual run with `dry_run` on.
+Before pushing, preview the image: `python3 social/render.py blog/posts/day-NN-name.md out.png`. Check the run in the repo's Actions tab after the push. Requires secret `BUFFER_API_KEY` (the channel ids are built into the workflow). Test without posting via the workflow's manual run with `dry_run` on.
 
 ## 5. Commit and push
 Commit the blog post, advent entry and thumbnail, and push to `main` on this repo. This push triggers the social posts.
