@@ -382,21 +382,6 @@ def excerpt(body, limit=200):
     if len(t) <= limit: return t
     return t[:limit].rsplit(" ", 1)[0].rstrip(".,;:!?") + "\u2026"
 
-def update_home_latest(posts):
-    """Homepage block: abridged most recent post; the whole card links to it."""
-    if not posts: return
-    p = posts[0]  # posts are sorted newest (highest day) first
-    n = p["day"]; head = f"Day {n:02d}" if n >= 1 else "Announcement"
-    block = (f'<section class="latest" aria-labelledby="latest-h"><p class="label">Latest from the blog</p><h2 id="latest-h">Latest launch</h2>'
-             f'<article class="panel latest__card"><div class="panel__head panel__head--pink"><span>{head}</span><span class="latest__type">{E(p["type"])}</span></div>'
-             f'<div class="panel__body latest__body"><h3>{E(p["title"])}</h3><p>{E(excerpt(p["body"]))}</p>'
-             f'<span class="l30-btn l30-btn--secondary latest__cta" aria-hidden="true">Read the post</span></div>'
-             f'<a class="latest__link" href="/blog/{p["slug"]}/" aria-label="Read the post: {head}: {E(p["title"])}"></a></article></section>')
-    h = ROOT.parent / "index.html"
-    s = h.read_text(encoding="utf-8")
-    s = re.sub(r"<!--latest-->.*?<!--/latest-->", lambda m: f"<!--latest-->{block}<!--/latest-->", s, flags=re.S)
-    h.write_text(s, encoding="utf-8")
-
 def update_home_count(posts):
     n = sum(1 for p in posts if p["day"] >= 1)
     h = ROOT.parent / "index.html"
@@ -410,7 +395,7 @@ def main():
     for d in ROOT.iterdir():  # drop pages for posts that were unpublished
         if d.is_dir() and d.name.startswith("day-") and d.name not in live: shutil.rmtree(d)
     for p in posts: build_post(p)
-    build_index(posts); build_feed(posts); build_advent(posts); build_sitemap(posts); update_home_count(posts); update_home_latest(posts)
+    build_index(posts); build_feed(posts); build_advent(posts); build_sitemap(posts); update_home_count(posts)
     print(f"built {len(posts)} post(s)")
 
 if __name__ == "__main__": main()
