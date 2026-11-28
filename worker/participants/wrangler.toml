@@ -2,6 +2,9 @@ name = "30p30d-participants"
 main = "index.js"
 compatibility_date = "2026-11-01"
 
+# Keep the workers.dev URL on: the site front end (participants/p.js) calls it. Adding `routes` turns it off by default on deploy.
+workers_dev = true
+
 # Public participant pages and sitemap are served from the main domain (needs the domain proxied through Cloudflare).
 routes = [
   { pattern = "30products30days.com/u/*", zone_name = "30products30days.com" },
