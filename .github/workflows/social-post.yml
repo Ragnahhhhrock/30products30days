@@ -2,7 +2,9 @@ name: Post launch to social
 
 # When a launch blog post lands on main, render the square image, then post it
 # to the 30products30days Instagram account and Facebook page.
-# Needs repo secrets: META_PAGE_ACCESS_TOKEN, FACEBOOK_PAGE_ID, INSTAGRAM_USER_ID.
+# Posts through Buffer (same account as the other autoposters).
+# Needs: secret BUFFER_API_KEY; variables BUFFER_INSTAGRAM_CHANNEL and BUFFER_FACEBOOK_CHANNEL
+# (channel id or exact name; run this workflow with dry_run to list the channels). BUFFER_ORGANIZATION_ID is optional.
 on:
   push:
     branches: [main]
@@ -79,17 +81,17 @@ jobs:
             git push origin HEAD:main
           fi
 
-      - name: Post to Facebook and Instagram
+      - name: Post to Facebook and Instagram (Buffer)
         env:
-          META_PAGE_ACCESS_TOKEN: ${{ secrets.META_PAGE_ACCESS_TOKEN }}
-          FACEBOOK_PAGE_ID: ${{ secrets.FACEBOOK_PAGE_ID }}
-          INSTAGRAM_USER_ID: ${{ secrets.INSTAGRAM_USER_ID }}
+          BUFFER_API_KEY: ${{ secrets.BUFFER_API_KEY }}
+          BUFFER_ORGANIZATION_ID: ${{ vars.BUFFER_ORGANIZATION_ID }}
+          BUFFER_INSTAGRAM_CHANNEL: ${{ vars.BUFFER_INSTAGRAM_CHANNEL }}
+          BUFFER_FACEBOOK_CHANNEL: ${{ vars.BUFFER_FACEBOOK_CHANNEL }}
+          BUFFER_MODE: ${{ vars.BUFFER_MODE }}
           REPO: ${{ github.repository }}
         run: |
-          if [ "$DRY_RUN" != "true" ]; then
-            for v in META_PAGE_ACCESS_TOKEN FACEBOOK_PAGE_ID INSTAGRAM_USER_ID; do
-              [ -n "${!v}" ] || { echo "Missing repo secret $v"; exit 1; }
-            done
+          if [ -n "$BUFFER_API_KEY" ]; then
+            echo "Buffer channels:"; python3 social/post.py --list-channels
           fi
           SHA=$(git rev-parse HEAD)
           while read -r f; do

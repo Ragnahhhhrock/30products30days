@@ -18,7 +18,7 @@ Follow "Advent calendar entries" in `CLAUDE.md`:
 ## 3 and 4. Instagram and Facebook posts (automatic)
 Pushing the blog post to `main` triggers `.github/workflows/social-post.yml`, which:
 - renders the square (1080x1080) image from the post's front matter (`social/render.py`, design-system tokens only);
-- posts it to the 30products30days Instagram account and Facebook page (`social/post.py`) with the daily caption:
+- queues it on the 30products30days Instagram account and Facebook page through Buffer (`social/post.py`; Buffer posts at each channel's next slot) with the daily caption:
   ```
   Day NN: Product name.
   One sentence on what it is and who it is for.
@@ -28,7 +28,7 @@ Pushing the blog post to `main` triggers `.github/workflows/social-post.yml`, wh
   ```
 - records the result in `social/posted.json`, so a rerun never double-posts.
 
-Before pushing, preview the image: `python3 social/render.py blog/posts/day-NN-name.md out.png`. Check the run in the repo's Actions tab after the push. Requires repo secrets `META_PAGE_ACCESS_TOKEN`, `FACEBOOK_PAGE_ID`, `INSTAGRAM_USER_ID`. Test without posting via the workflow's manual run with `dry_run` on.
+Before pushing, preview the image: `python3 social/render.py blog/posts/day-NN-name.md out.png`. Check the run in the repo's Actions tab after the push. Requires secret `BUFFER_API_KEY` and variables `BUFFER_INSTAGRAM_CHANNEL`, `BUFFER_FACEBOOK_CHANNEL`. Test without posting via the workflow's manual run with `dry_run` on.
 
 ## 5. Commit and push
 Commit the blog post, advent entry and thumbnail, and push to `main` on this repo. This push triggers the social posts.

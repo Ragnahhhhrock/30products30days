@@ -1,57 +1,122 @@
 #!/usr/bin/env python3
-"""Post a launch to the 30 Products 30 Days Instagram account and Facebook page.
+"""Queue a launch on the 30 Products 30 Days Instagram account and Facebook page through Buffer.
 
   python3 social/post.py blog/posts/day-07-name.md [--dry-run]
+  python3 social/post.py --list-channels
 
-Env (GitHub Actions secrets): META_PAGE_ACCESS_TOKEN, FACEBOOK_PAGE_ID, INSTAGRAM_USER_ID
-Also: IMAGE_URL (public https URL of the square image).
-State lives in social/posted.json so a rerun never double-posts a platform.
-No dependencies (urllib only). The token is sent in the POST body and never printed.
+Same Buffer account and API key as the other autoposters (Buffer, Settings, API).
+Env:
+  BUFFER_API_KEY                  secret (required unless --dry-run)
+  BUFFER_ORGANIZATION_ID          optional; the account's first organisation if unset
+  BUFFER_INSTAGRAM_CHANNEL        channel id or name of the 30products30days Instagram channel
+  BUFFER_FACEBOOK_CHANNEL         channel id or name of the 30products30days Facebook page channel
+  IMAGE_URL                       public https URL of the square image
+  BUFFER_MODE                     addToQueue (default, Buffer picks the next slot) or shareNow
+The channel is never guessed: if it is not set or not found, the script lists what Buffer has and stops,
+so a launch can never land on another project's account. State is kept in social/posted.json.
 """
-import json, os, pathlib, sys, time, urllib.error, urllib.parse, urllib.request
+import json, os, pathlib, sys, time
+import urllib.error, urllib.request
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 from launchpost import parse, caption, alt_text
 
-API = "https://graph.facebook.com/v21.0"
+API = os.environ.get("BUFFER_API_URL", "https://api.buffer.com")
 STATE = pathlib.Path(__file__).resolve().parent / "posted.json"
+PLATFORMS = (("facebook", "BUFFER_FACEBOOK_CHANNEL"), ("instagram", "BUFFER_INSTAGRAM_CHANNEL"))
 
-def call(path, data):
-    body = urllib.parse.urlencode({**data, "access_token": os.environ["META_PAGE_ACCESS_TOKEN"]}).encode()
+def q(s):
+    return json.dumps(s, ensure_ascii=False)
+
+def gql(query, key):
+    req = urllib.request.Request(API, data=json.dumps({"query": query}).encode(), headers={
+        "Authorization": f"Bearer {key}", "Content-Type": "application/json", "User-Agent": "30products30days-social/1.0"})
     try:
-        with urllib.request.urlopen(urllib.request.Request(f"{API}/{path}", data=body), timeout=60) as r:
+        with urllib.request.urlopen(req, timeout=60) as r:
             return json.load(r)
     except urllib.error.HTTPError as e:
-        sys.exit(f"Graph API {path} failed: {e.code} {e.read().decode()[:400]}")
+        sys.exit(f"Buffer returned {e.code}: {e.read().decode()[:300]}")
 
-def get(path, params):
-    q = urllib.parse.urlencode({**params, "access_token": os.environ["META_PAGE_ACCESS_TOKEN"]})
-    with urllib.request.urlopen(f"{API}/{path}?{q}", timeout=60) as r:
-        return json.load(r)
+def channels(key):
+    org = os.environ.get("BUFFER_ORGANIZATION_ID")
+    if not org:
+        d = gql("query { account { organizations { id name } } }", key)
+        orgs = (((d.get("data") or {}).get("account") or {}).get("organizations")) or []
+        if not orgs:
+            sys.exit(f"No Buffer organisation found (set BUFFER_ORGANIZATION_ID): {json.dumps(d)[:300]}")
+        org = orgs[0]["id"]
+    d = gql("query { channels(input: { organizationId: %s }) { id name service } }" % q(org), key)
+    return (d.get("data") or {}).get("channels") or []
 
-def facebook(meta, image_url):
-    r = call(f"{os.environ['FACEBOOK_PAGE_ID']}/photos",
-             {"url": image_url, "caption": caption(meta, "facebook"),
-              "alt_text_custom": alt_text(meta), "published": "true"})
-    return r.get("post_id") or r["id"]
+def show(chans):
+    for c in chans:
+        print(f"  {c['service']:<10} {c['name']:<40} id={c['id']}")
 
-def instagram(meta, image_url):
-    uid = os.environ["INSTAGRAM_USER_ID"]
-    c = call(f"{uid}/media", {"image_url": image_url, "caption": caption(meta, "instagram"),
-                              "alt_text": alt_text(meta)})["id"]
-    for _ in range(30):  # wait for Instagram to fetch and process the image
-        s = get(c, {"fields": "status_code"}).get("status_code")
-        if s == "FINISHED":
-            break
-        if s in ("ERROR", "EXPIRED"):
-            sys.exit(f"Instagram container {c} status {s}")
-        time.sleep(4)
-    else:
-        sys.exit(f"Instagram container {c} not ready in time")
-    return call(f"{uid}/media_publish", {"creation_id": c})["id"]
+def pick(chans, service, want):
+    """Match by exact id, else exact name (case-insensitive), within the right service. Never a default."""
+    pool = [c for c in chans if str(c["service"]).lower() == service]
+    for c in pool:
+        if c["id"] == want:
+            return c
+    hit = [c for c in pool if c["name"].strip().lower() == want.strip().lower()]
+    return hit[0] if len(hit) == 1 else None
+
+def mutation(ch, service, text, image_url, alt, level):
+    meta = ""
+    if level == 0:
+        meta = {"instagram": "metadata: { instagram: { type: post, shouldShareToFeed: true } }",
+                "facebook": "metadata: { facebook: { type: post } }"}[service]
+    img_meta = f"metadata: {{ altText: {q(alt)} }}" if level <= 1 else ""
+    mode = os.environ.get("BUFFER_MODE", "addToQueue")
+    return f"""mutation {{
+  createPost(input: {{
+    text: {q(text)}
+    channelId: {q(ch['id'])}
+    schedulingType: automatic
+    mode: {mode}
+    {meta}
+    assets: [{{ image: {{ url: {q(image_url)} {img_meta} }} }}]
+  }}) {{
+    ... on PostActionSuccess {{ post {{ id }} }}
+    ... on MutationError {{ message }}
+  }}
+}}"""
+
+def create(ch, service, meta, image_url, key, dry):
+    text, alt = caption(meta, service), alt_text(meta)
+    err = ""
+    for level in (0, 1, 2):  # full metadata, then alt text only, then the bare image post
+        m = mutation(ch, service, text, image_url, alt, level)
+        if dry:
+            print(m); return "dry-run"
+        d = gql(m, key)
+        res = (d.get("data") or {}).get("createPost")
+        if res and res.get("post"):
+            return res["post"]["id"]
+        err = (res or {}).get("message") or json.dumps(d.get("errors") or d)[:300]
+        print(f"  {service}: attempt {level + 1} rejected: {err}")
+    sys.exit(f"{service}: could not queue the post: {err}")
+
+def wait_live(url, minutes=5):
+    end = time.time() + minutes * 60
+    while time.time() < end:
+        try:
+            req = urllib.request.Request(url, method="HEAD", headers={"User-Agent": "30products30days-social/1.0"})
+            with urllib.request.urlopen(req, timeout=20) as r:
+                if r.status == 200:
+                    return True
+        except Exception:
+            pass
+        time.sleep(15)
+    return False
 
 def main():
     args = [a for a in sys.argv[1:] if not a.startswith("--")]
     dry = "--dry-run" in sys.argv
+    key = os.environ.get("BUFFER_API_KEY", "")
+    if "--list-channels" in sys.argv:
+        if not key:
+            sys.exit("BUFFER_API_KEY is not set")
+        show(channels(key)); return
     if not args:
         sys.exit(__doc__)
     meta = parse(args[0])
@@ -61,18 +126,35 @@ def main():
     image_url = os.environ.get("IMAGE_URL", "")
     if not image_url.startswith("https://"):
         sys.exit("IMAGE_URL must be a public https URL")
+    if not key and not dry:
+        sys.exit("BUFFER_API_KEY is not set, so nothing can be posted")
     state = json.loads(STATE.read_text()) if STATE.exists() else {}
     done = state.get(day, {})
-    for name, fn in (("facebook", facebook), ("instagram", instagram)):
-        if name in done:
-            print(f"{name}: already posted ({done[name]}); skipping."); continue
-        if dry:
-            print(f"--- {name} (dry run)\nimage: {image_url}\n{caption(meta, name)}\nalt: {alt_text(meta)}\n")
-            continue
-        done[name] = fn(meta, image_url)
-        state[day] = done
-        STATE.write_text(json.dumps(state, indent=2) + "\n")  # save after each platform
-        print(f"{name}: posted {done[name]}")
+    todo = [(p, v) for p, v in PLATFORMS if p not in done]
+    if not todo:
+        print(f"Day {day} already posted: {done}"); return
+    chans = channels(key) if key else []
+    picked = {}
+    for p, var in todo:
+        want = os.environ.get(var, "").strip()
+        if dry and not key:
+            picked[p] = {"id": want or f"dry-{p}", "name": want or p, "service": p}; continue
+        ch = pick(chans, p, want) if want else None
+        if not ch:
+            print(f"{var} is {'not set' if not want else 'not a ' + p + ' channel in this Buffer account'}. Channels available:")
+            show(chans)
+            sys.exit(f"Set {var} to the id or exact name of the 30products30days {p} channel.")
+        picked[p] = ch
+    if not dry and not wait_live(image_url):
+        sys.exit(f"Image is not live yet: {image_url}")
+    for p, _ in todo:
+        print(f"== {p} -> {picked[p]['name']}")
+        pid = create(picked[p], p, meta, image_url, key, dry)
+        if not dry:
+            done[p] = pid
+            state[day] = done
+            STATE.write_text(json.dumps(state, indent=2) + "\n")
+            print(f"  queued ({pid})")
 
 if __name__ == "__main__":
     main()
