@@ -20,7 +20,7 @@ Order is fixed: blog post, advent entry, Instagram, Facebook. Push the blog post
 - renders the square (1080x1080) image from the post's front matter (`social/render.py`, design-system tokens only);
 - queues it on the 30products30days Instagram account and Facebook page through Buffer (`social/post.py`; Buffer posts at each channel's next slot) with the daily caption:
   ```
-  Day NN: Product name.
+  Day NN of R: Product name.   (R = 30 minus NN, the days remaining; Day 01 of 29)
   One sentence on what it is and who it is for.
   Price. Link in bio.   (Facebook: the product link instead of "Link in bio.")
   N of 30 shipped.

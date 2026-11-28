@@ -9,7 +9,7 @@ Set CHROME_PATH to use a local Chrome instead of Playwright's Chromium.
 """
 import html, os, pathlib, sys
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
-from launchpost import parse
+from launchpost import parse, day_label
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 FONTS = (ROOT / "design-system" / "fonts").as_uri()
@@ -42,7 +42,7 @@ p{{font:400 20px/1.55 "DM Sans",Arial,sans-serif;display:-webkit-box;-webkit-lin
 .fill{{height:100%;width:{pct}%;background:#FFD21F;border-right:3px solid #0F1B3D}}
 </style><body><div class="card">
 <div class="head"><svg width="56" height="56" viewBox="0 0 120 120" role="img" aria-label="Day {day}"><circle cx="54" cy="58" r="46" fill="#0F1B3D"/><circle cx="48" cy="52" r="46" fill="#FFD21F" stroke="#0F1B3D" stroke-width="5"/><text x="48" y="68" text-anchor="middle" font-family="Bricolage Grotesque" font-weight="800" font-size="50" letter-spacing="-3" fill="#0F1B3D">{day}</text><path d="{STAR}" fill="#FF6F91" stroke="#0F1B3D" stroke-width="3" stroke-linejoin="round"/></svg>
-<span class="day">Day {day}</span><span class="type">{E(m['type'])}</span></div>
+<span class="day">{E(day_label(m))}</span><span class="type">{E(m['type'])}</span></div>
 <div class="body"><h1>{E(title)}</h1><p>{E(m['summary'])}</p><div class="price">{E(m['price'])}</div></div>
 <div class="foot"><div class="label">{n} of 30 shipped</div><div class="track" role="progressbar" aria-valuemin="0" aria-valuemax="30" aria-valuenow="{n}"><div class="fill"></div></div></div>
 </div></body></html>"""
