@@ -67,7 +67,7 @@ def mutation(ch, service, text, image_url, alt, level):
         meta = {"instagram": "metadata: { instagram: { type: post, shouldShareToFeed: true } }",
                 "facebook": "metadata: { facebook: { type: post } }"}[service]
     img_meta = f"metadata: {{ altText: {q(alt)} }}" if level <= 1 else ""
-    mode = os.environ.get("BUFFER_MODE", "addToQueue")
+    mode = os.environ.get("BUFFER_MODE") or "addToQueue"  # an empty variable counts as unset
     return f"""mutation {{
   createPost(input: {{
     text: {q(text)}
