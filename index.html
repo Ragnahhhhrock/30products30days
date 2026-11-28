@@ -352,9 +352,10 @@ gtag('config','G-FM1RLPT7RK');
     document.getElementById('s').textContent = pad(s%60);
   }
   tick(); setInterval(tick,1000);
-  // Products launched = total across all participants (falls back to the number built into the page).
-  fetch('https://30p30d-participants.malgordonperth.workers.dev/api/public/stats').then(function(r){return r.json()}).then(function(d){
-    if(d && typeof d.launched==='number' && d.launched>0) document.getElementById('plaunched').textContent=d.launched;
+  // Products launched = total shipped by all participants (falls back to the number built into the page).
+  fetch('https://30p30d-participants.malgordonperth.workers.dev/api/public/participants').then(function(r){return r.json()}).then(function(d){
+    var n=0; (d.participants||[]).forEach(function(p){n+=p.shipped||0});
+    if(n>0) document.getElementById('plaunched').textContent=n;
   }).catch(function(){});
 </script>
 <script>

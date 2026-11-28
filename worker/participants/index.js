@@ -130,14 +130,6 @@ export default {
         ).bind(td).all();
         return json({ today_day: td, participants: rows.results }, 200, o);
       }
-      if (request.method === "GET" && path === "/api/public/stats") {
-        // Total products launched by all approved participants (published, not hidden, day already reached).
-        const r = await env.DB.prepare(
-          `SELECT COUNT(e.id) AS launched FROM entries e JOIN participants p ON p.id=e.participant_id
-           WHERE p.status='approved' AND e.status='published' AND e.hidden=0 AND e.day<=?`
-        ).bind(todayDay()).first();
-        return json({ launched: (r && r.launched) || 0 }, 200, o);
-      }
       let m = path.match(/^\/api\/public\/u\/([a-z0-9-]{3,24})$/);
       if (request.method === "GET" && m) {
         const td = todayDay();
