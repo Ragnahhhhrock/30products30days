@@ -59,6 +59,10 @@ async function auth(request, env) {
 }
 
 const imgUrl = (k) => (k ? `/api/img/${k}` : null);
+const summarise = (b, n = 160) => {
+  const t = String(b || "").replace(/!?\[([^\]]*)\]\([^)]*\)/g, "$1").replace(/[#*_`>~-]+/g, " ").replace(/\s+/g, " ").trim();
+  return t.length <= n ? t : t.slice(0, n).replace(/\s+\S*$/, "").replace(/[.,;:!?]+$/, "") + "\u2026";
+};
 const entryOut = (e) => ({ day: e.day, product_name: e.product_name, pitch: e.pitch, product_url: e.product_url, price: e.price, type: e.type, body: e.body, image: imgUrl(e.image_key), status: e.status, hidden: !!e.hidden, updated_at: e.updated_at });
 const publicEntry = (e) => ({ day: e.day, product_name: e.product_name, pitch: e.pitch, product_url: e.product_url, price: e.price, type: e.type, body: e.body, image: imgUrl(e.image_key) });
 const linksOut = (p) => ({ website: p.website || "", x: p.x_url || "", instagram: p.instagram_url || "", linkedin: p.linkedin_url || "" });
@@ -163,12 +167,12 @@ export default {
         const td = todayDay();
         const lim = Math.min(Math.max(parseInt(url.searchParams.get("limit"), 10) || 6, 1), 12);
         const rows = await env.DB.prepare(
-          `SELECT p.username, p.display_name, p.avatar_key, e.day, e.product_name, e.pitch, e.type, e.price, e.updated_at
+          `SELECT p.username, p.display_name, p.avatar_key, e.day, e.product_name, e.pitch, e.type, e.price, e.body, e.updated_at
            FROM entries e JOIN participants p ON p.id=e.participant_id
            WHERE e.status='published' AND e.hidden=0 AND e.day<=? AND p.status='approved' AND p.username IS NOT NULL
            ORDER BY e.day DESC, e.updated_at DESC LIMIT ?`
         ).bind(td, lim).all();
-        return json({ today_day: td, posts: rows.results.map(({ avatar_key, ...r }) => ({ ...r, avatar: imgUrl(avatar_key) })) }, 200, o);
+        return json({ today_day: td, posts: rows.results.map(({ avatar_key, body, ...r }) => ({ ...r, summary: summarise(body), avatar: imgUrl(avatar_key) })) }, 200, o);
       }
       let m = path.match(/^\/api\/public\/u\/([a-z0-9-]{3,24})$/);
       if (request.method === "GET" && m) {

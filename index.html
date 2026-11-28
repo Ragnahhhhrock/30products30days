@@ -181,11 +181,12 @@ gtag('config','G-FM1RLPT7RK');
 
 <main class="wrap">
 
-  <section class="community-feed" id="community-feed" aria-labelledby="feed-h" hidden>
+  <section class="community-feed" id="community-feed" aria-labelledby="feed-h">
     <p class="label">Community</p>
-    <h2 id="feed-h">Latest launches from the community</h2>
+    <h2 id="feed-h">Latest posts from the community</h2>
     <ul class="feed" id="feed"></ul>
-    <div class="feed__more"><a class="l30-btn l30-btn--secondary" href="/community/">See everyone</a></div>
+    <p class="muted" id="feed-empty" hidden>No community posts yet. The first ones land today.</p>
+    <div class="feed__more"><a class="l30-btn l30-btn--secondary" href="/community/">See everyone</a><a class="l30-btn l30-btn--secondary" href="/register.html">Join the challenge</a></div>
   </section>
 
   <section class="watch">
@@ -375,15 +376,16 @@ gtag('config','G-FM1RLPT7RK');
 // endpoints until the Worker with that route is deployed.
 (function(){
   var API='https://30p30d-participants.malgordonperth.workers.dev', N=6;
-  var box=document.getElementById('community-feed'), ul=document.getElementById('feed');
+  var box=document.getElementById('community-feed'), ul=document.getElementById('feed'), empty=document.getElementById('feed-empty');
   function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+  function sum(b){var t=String(b||'').replace(/!?\[([^\]]*)\]\([^)]*\)/g,'$1').replace(/[#*_`>~-]+/g,' ').replace(/\s+/g,' ').trim();return t.length<=160?t:t.slice(0,160).replace(/\s+\S*$/,'').replace(/[.,;:!?]+$/,'')+'\u2026'}
   function get(path){return fetch(API+path).then(function(r){if(!r.ok)throw 0;return r.json()})}
   function viaParticipants(){
     return get('/api/public/participants').then(function(d){
       var list=(d.participants||[]).filter(function(p){return p.shipped>0});
       return Promise.all(list.map(function(p){
         return get('/api/public/u/'+encodeURIComponent(p.username)).then(function(u){
-          return (u.entries||[]).map(function(e){return {username:p.username,display_name:p.display_name,avatar:p.avatar,day:e.day,product_name:e.product_name,pitch:e.pitch,type:e.type,price:e.price}});
+          return (u.entries||[]).map(function(e){return {username:p.username,display_name:p.display_name,avatar:p.avatar,day:e.day,product_name:e.product_name,pitch:e.pitch,summary:sum(e.body),type:e.type,price:e.price}});
         }).catch(function(){return []});
       })).then(function(a){
         return [].concat.apply([],a).sort(function(x,y){return y.day-x.day}).slice(0,N);
@@ -394,8 +396,8 @@ gtag('config','G-FM1RLPT7RK');
     return get('/api/public/latest?limit='+N).then(function(d){return d.posts||[]}).catch(viaParticipants);
   }
   Promise.all([load(),fetch('/u/',{method:'HEAD'}).then(function(r){return r.ok}).catch(function(){return false})]).then(function(r){
-    var posts=r[0],live=r[1];
-    if(!posts.length)return;
+    var posts=r[0]||[],live=r[1];
+    if(!posts.length){empty.hidden=false;return}
     ul.innerHTML=posts.map(function(p,i){
       var t=(p.day<10?'0':'')+p.day, name=esc(p.product_name||'Untitled');
       var href=live?'/u/'+encodeURIComponent(p.username)+'/day-'+t+'/':'/calendar/?u='+encodeURIComponent(p.username);
@@ -403,12 +405,11 @@ gtag('config','G-FM1RLPT7RK');
       var head=['pink','yellow','blue'][i%3];
       var meta=[p.type,p.price].filter(Boolean).map(esc).join(' · ');
       return '<li><article class="panel feed__card"><div class="panel__head panel__head--'+head+'"><span>Day '+t+'</span><span class="latest__type">'+esc(p.type||'Digital')+'</span></div>'+
-        '<div class="panel__body"><h3>'+name+'</h3>'+(p.pitch?'<p>'+esc(p.pitch)+'</p>':'')+
+        '<div class="panel__body"><h3>'+name+'</h3>'+(p.summary||p.pitch?'<p>'+esc(p.summary||p.pitch)+'</p>':'')+
         '<div class="feed__by">'+av+'<span>'+esc(p.display_name||p.username)+'</span></div>'+
         (p.price?'<span class="feed__meta">'+esc(p.price)+'</span>':'')+'</div>'+
         '<a class="feed__link" href="'+href+'" aria-label="Read Day '+t+': '+name+' by '+esc(p.display_name||p.username)+'"></a></article></li>';
     }).join('');
-    box.hidden=false;
   });
 })();
 </script>
