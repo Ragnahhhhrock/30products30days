@@ -1,0 +1,26 @@
+name = "30p30d-mcp"
+main = "index.js"
+compatibility_date = "2026-11-01"
+
+# Remote MCP server for registrants' agents. Needs the 30products30days.com zone on Cloudflare.
+routes = [{ pattern = "mcp.30products30days.com", custom_domain = true }]
+
+# Same sending binding as the participants Worker (sign-in emails for the agent consent step).
+send_email = [{ name = "EMAIL" }]
+
+# Shares the participants database and image bucket.
+[[d1_databases]]
+binding = "DB"
+database_name = "30p30d-participants"
+database_id = "c852b8ca-0a5f-4171-9706-c4a3ece184d1"
+
+[[r2_buckets]]
+binding = "IMAGES"
+bucket_name = "30p30d-participant-images"
+
+[vars]
+ISSUER = "https://mcp.30products30days.com"
+TURNSTILE_SITEKEY = "0x4AAAAAAGF6g2TF2JRMYtWo"
+SPAM_EXEMPT_EMAILS = "yes.thatmichael@gmail.com"   # keep in step with the participants Worker
+
+# Secret (set once): TURNSTILE_SECRET
