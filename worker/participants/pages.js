@@ -88,7 +88,7 @@ ${o.ld ? `<script type="application/ld+json">${ld(o.ld)}</script>` : ""}
 <body>
 ${navHtml(o.nav || "/community/")}
 ${o.body}
-<footer><div class="wrap"><img src="/brand/logos/launch-badge.svg" alt="" width="32" height="32"><span>&copy; 2026 30products30days.com</span><a href="/">Home</a><a href="/community/">Community</a><a href="/blog/">Blog</a><a href="/advent/">Advent calendar</a></div></footer>
+<footer><div class="wrap"><img src="/brand/logos/launch-badge.svg" alt="" width="32" height="32"><span>&copy; 2026 30products30days.com</span><a href="/">Home</a><a href="/community/">Community</a><a href="/blog/">Blog</a><a href="/advent/">Advent calendar</a><span>Another <a href="https://malgordon.com">Mal Gordon</a> creation</span></div></footer>
 <script src="/participants/p.js"></script>
 ${o.script ? `<script>${o.script}</script>` : ""}
 </body>
