@@ -20,7 +20,7 @@ Order is fixed: blog post, advent entry, Instagram, Facebook, LinkedIn. Push the
 - renders the images from the post's front matter (`social/render.py`, design-system tokens only): square 1080x1080 for Instagram and Facebook, landscape 1200x628 for LinkedIn;
 - queues it on the 30products30days Instagram account, the Facebook page and Malcolm's personal LinkedIn through Buffer (`social/post.py`; Buffer posts at each channel's next slot) with the daily caption:
   ```
-  Day NN of R: Product name.   (R = 30 minus NN, days remaining: Day 01 of 29; Day 30 reads "Day 30: final day")
+  Day NN of 30: Product name.   (NN is the day of the challenge, zero-padded: Day 01 of 30 ... Day 30 of 30)
   One sentence on what it is and who it is for.
   Price. Read the launch post: <blog post URL>   (https://30products30days.com/blog/<post-file-name>/)
   N of 30 shipped.
