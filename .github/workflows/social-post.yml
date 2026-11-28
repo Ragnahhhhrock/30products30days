@@ -1,0 +1,112 @@
+name: Post launch to social
+
+# When a launch blog post lands on main, render the square image, then post it
+# to the 30products30days Instagram account and Facebook page.
+# Needs repo secrets: META_PAGE_ACCESS_TOKEN, FACEBOOK_PAGE_ID, INSTAGRAM_USER_ID.
+on:
+  push:
+    branches: [main]
+    paths: ['blog/posts/day-*.md']
+  workflow_dispatch:
+    inputs:
+      post:
+        description: 'Post file, e.g. blog/posts/day-07-name.md'
+        required: true
+      dry_run:
+        description: 'Render and print captions only; do not post'
+        type: boolean
+        default: true
+
+concurrency:
+  group: social-post
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    env:
+      DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run || 'false' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Find launch posts
+        env:
+          EVENT: ${{ github.event_name }}
+          INPUT_POST: ${{ inputs.post }}
+        run: |
+          if [ "$EVENT" = "workflow_dispatch" ]; then
+            printf '%s\n' "$INPUT_POST" > /tmp/posts.txt
+          else
+            git diff --name-only --diff-filter=AM HEAD^ HEAD -- 'blog/posts/day-*.md' > /tmp/posts.txt
+          fi
+          while read -r f; do
+            [ -z "$f" ] && continue
+            echo "$f" | grep -Eq '^blog/posts/day-[0-9]+-[a-z0-9-]+\.md$' || { echo "Bad post path: $f"; exit 1; }
+            [ -f "$f" ] || { echo "Missing: $f"; exit 1; }
+          done < /tmp/posts.txt
+          cat /tmp/posts.txt
+
+      - name: Install renderer
+        run: |
+          pip install playwright
+          playwright install --with-deps chromium
+
+      - name: Render square images
+        run: |
+          while read -r f; do
+            [ -z "$f" ] && continue
+            python3 social/render.py "$f"
+          done < /tmp/posts.txt
+
+      - name: Publish images (Instagram needs a public URL)
+        if: env.DRY_RUN != 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add social/out
+          if ! git diff --cached --quiet; then
+            git commit -m "Add social images [skip ci]"
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
+
+      - name: Post to Facebook and Instagram
+        env:
+          META_PAGE_ACCESS_TOKEN: ${{ secrets.META_PAGE_ACCESS_TOKEN }}
+          FACEBOOK_PAGE_ID: ${{ secrets.FACEBOOK_PAGE_ID }}
+          INSTAGRAM_USER_ID: ${{ secrets.INSTAGRAM_USER_ID }}
+          REPO: ${{ github.repository }}
+        run: |
+          if [ "$DRY_RUN" != "true" ]; then
+            for v in META_PAGE_ACCESS_TOKEN FACEBOOK_PAGE_ID INSTAGRAM_USER_ID; do
+              [ -n "${!v}" ] || { echo "Missing repo secret $v"; exit 1; }
+            done
+          fi
+          SHA=$(git rev-parse HEAD)
+          while read -r f; do
+            [ -z "$f" ] && continue
+            d=$(sed -n 's/^day: *//p' "$f" | head -1)
+            img=$(printf 'social/out/day-%02d.png' "$((10#$d))")
+            export IMAGE_URL="https://raw.githubusercontent.com/$REPO/$SHA/$img"
+            flags=""; [ "$DRY_RUN" = "true" ] && flags="--dry-run"
+            python3 social/post.py "$f" $flags
+          done < /tmp/posts.txt
+
+      - name: Record what was posted
+        if: always() && env.DRY_RUN != 'true'
+        run: |
+          git add social/posted.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Record social posts [skip ci]"
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi

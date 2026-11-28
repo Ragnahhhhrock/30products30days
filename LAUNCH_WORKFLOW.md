@@ -15,29 +15,26 @@ Follow "Advent calendar entries" in `CLAUDE.md`:
 - Insert it in that day's `.door__inside`, wrapped in a link to the product URL (not the blog post). Set `data-post="1"` on the door.
 - Re-run `python3 blog/build.py` and check the door opens on its date.
 
-## 3. Instagram post (@30products30days)
-- Render a **square (1080x1080) image** from the daily template: edit day number, product name, price and progress in `social/build.py`, run `python3 social/build.py`. Output is in `instagram/`.
-- Caption (daily template from the project's `social-copy.md`):
+## 3 and 4. Instagram and Facebook posts (automatic)
+Pushing the blog post to `main` triggers `.github/workflows/social-post.yml`, which:
+- renders the square (1080x1080) image from the post's front matter (`social/render.py`, design-system tokens only);
+- posts it to the 30products30days Instagram account and Facebook page (`social/post.py`) with the daily caption:
   ```
   Day NN: Product name.
   One sentence on what it is and who it is for.
-  Price. Link in bio.
+  Price. Link in bio.   (Facebook: the product link instead of "Link in bio.")
   N of 30 shipped.
   #30products30days
   ```
-- Add alt text: "Product card for Day NN with a progress bar showing N of 30 shipped."
-- Post to the 30products30days Instagram account.
+- records the result in `social/posted.json`, so a rerun never double-posts.
 
-## 4. Facebook post (30 Products 30 Days page)
-- Use the same image, with the same caption pattern plus the product link.
-- Post to the 30products30days Facebook page.
+Before pushing, preview the image: `python3 social/render.py blog/posts/day-NN-name.md out.png`. Check the run in the repo's Actions tab after the push. Requires repo secrets `META_PAGE_ACCESS_TOKEN`, `FACEBOOK_PAGE_ID`, `INSTAGRAM_USER_ID`. Test without posting via the workflow's manual run with `dry_run` on.
 
 ## 5. Commit and push
-Commit all changes (blog, advent, social assets) and push to `main` on this repo.
+Commit the blog post, advent entry and thumbnail, and push to `main` on this repo. This push triggers the social posts.
 
 ## Checklist
 - [ ] Blog post built, no placeholders
 - [ ] Advent thumbnail + link + `data-post="1"`
-- [ ] Instagram square image posted
-- [ ] Facebook image post published
+- [ ] Social workflow run succeeded (Instagram + Facebook)
 - [ ] Committed and pushed

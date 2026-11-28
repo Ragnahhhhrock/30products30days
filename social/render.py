@@ -1,0 +1,73 @@
+#!/usr/bin/env python3
+"""Render the square (1080x1080) social image for a launch post.
+
+  python3 social/render.py blog/posts/day-07-name.md [out.png]
+
+Built only from design-system tokens: ink outlines (3px), hard bottom-right
+shadow, Bricolage Grotesque 800 + DM Sans, DayBadge with only the number swapped.
+Set CHROME_PATH to use a local Chrome instead of Playwright's Chromium.
+"""
+import html, os, pathlib, sys
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+from launchpost import parse
+
+ROOT = pathlib.Path(__file__).resolve().parent.parent
+FONTS = (ROOT / "design-system" / "fonts").as_uri()
+STAR = "M100 6 L104 18 L116 22 L104 26 L100 38 L96 26 L84 22 L96 18 Z"  # from DayBadge
+E = html.escape
+
+def page(m):
+    n = m["day"]
+    day = f"{n:02d}"
+    title = m["title"]
+    tsize = 56 if len(title) <= 16 else 44 if len(title) <= 30 else 32
+    pct = round(n / 30 * 100)
+    return f"""<!doctype html><html lang="en"><meta charset="utf-8"><style>
+@font-face{{font-family:"Bricolage Grotesque";font-weight:800;src:url({FONTS}/BricolageGrotesque-ExtraBold.ttf)}}
+@font-face{{font-family:"DM Sans";font-weight:400;src:url({FONTS}/DMSans-Regular.ttf)}}
+@font-face{{font-family:"DM Sans";font-weight:700;src:url({FONTS}/DMSans-Bold.ttf)}}
+*{{box-sizing:border-box;margin:0}}
+body{{width:540px;height:540px;background:#F2F5FA;font-family:"DM Sans",Arial,sans-serif;color:#0F1B3D;position:relative;overflow:hidden}}
+.card{{position:absolute;left:24px;top:24px;width:482px;height:482px;background:#FFFFFF;border:3px solid #0F1B3D;border-radius:28px;box-shadow:10px 10px 0 0 #0F1B3D;overflow:hidden;display:flex;flex-direction:column}}
+.head{{display:flex;align-items:center;gap:12px;padding:12px 20px;background:#FF6F91;border-bottom:3px solid #0F1B3D}}
+.day{{font:800 22px/1 "Bricolage Grotesque",Arial,sans-serif;letter-spacing:-.5px}}
+.type{{margin-left:auto;background:#FFFFFF;border:2px solid #0F1B3D;border-radius:999px;padding:4px 12px;font:700 12px/1.2 "DM Sans",Arial,sans-serif}}
+.body{{flex:1;padding:24px;display:flex;flex-direction:column;gap:12px}}
+h1{{font:800 {tsize}px/1 "Bricolage Grotesque",Arial,sans-serif;letter-spacing:-2px}}
+p{{font:400 20px/1.55 "DM Sans",Arial,sans-serif;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}}
+.price{{margin-top:auto;font:800 32px/1.1 "Bricolage Grotesque",Arial,sans-serif;letter-spacing:-1px}}
+.foot{{padding:14px 24px 18px;border-top:3px solid #0F1B3D;background:#FFFFFF}}
+.label{{font:700 13px/1.3 "DM Sans",Arial,sans-serif;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px}}
+.track{{height:16px;border:3px solid #0F1B3D;border-radius:999px;background:#FFFFFF;overflow:hidden}}
+.fill{{height:100%;width:{pct}%;background:#FFD21F;border-right:3px solid #0F1B3D}}
+</style><body><div class="card">
+<div class="head"><svg width="56" height="56" viewBox="0 0 120 120" role="img" aria-label="Day {day}"><circle cx="54" cy="58" r="46" fill="#0F1B3D"/><circle cx="48" cy="52" r="46" fill="#FFD21F" stroke="#0F1B3D" stroke-width="5"/><text x="48" y="68" text-anchor="middle" font-family="Bricolage Grotesque" font-weight="800" font-size="50" letter-spacing="-3" fill="#0F1B3D">{day}</text><path d="{STAR}" fill="#FF6F91" stroke="#0F1B3D" stroke-width="3" stroke-linejoin="round"/></svg>
+<span class="day">Day {day}</span><span class="type">{E(m['type'])}</span></div>
+<div class="body"><h1>{E(title)}</h1><p>{E(m['summary'])}</p><div class="price">{E(m['price'])}</div></div>
+<div class="foot"><div class="label">{n} of 30 shipped</div><div class="track" role="progressbar" aria-valuemin="0" aria-valuemax="30" aria-valuenow="{n}"><div class="fill"></div></div></div>
+</div></body></html>"""
+
+def main():
+    if len(sys.argv) < 2:
+        sys.exit(__doc__)
+    post = pathlib.Path(sys.argv[1])
+    m = parse(post)
+    out = pathlib.Path(sys.argv[2]) if len(sys.argv) > 2 else ROOT / "social" / "out" / f"day-{m['day']:02d}.png"
+    out.parent.mkdir(parents=True, exist_ok=True)
+    from playwright.sync_api import sync_playwright
+    tmp = out.with_suffix(".html")
+    tmp.write_text(page(m), encoding="utf-8")
+    with sync_playwright() as p:
+        kw = {"executable_path": os.environ["CHROME_PATH"]} if os.environ.get("CHROME_PATH") else {}
+        b = p.chromium.launch(args=["--allow-file-access-from-files"], **kw)
+        pg = b.new_page(viewport={"width": 540, "height": 540}, device_scale_factor=2)
+        pg.goto(tmp.as_uri())
+        pg.evaluate("document.fonts.ready")
+        pg.wait_for_timeout(300)
+        pg.screenshot(path=str(out))
+        b.close()
+    tmp.unlink()
+    print(out)
+
+if __name__ == "__main__":
+    main()
