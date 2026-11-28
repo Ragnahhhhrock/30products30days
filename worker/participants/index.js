@@ -37,6 +37,7 @@ async function limited(env, key, max, windowSec) {
 }
 
 const adminList = (env) => String(env.ADMIN_EMAILS || "").split(",").map((s) => s.trim().toLowerCase()).filter(Boolean);
+const spamExempt = (env) => String(env.SPAM_EXEMPT_EMAILS || "").split(",").map((s) => s.trim().toLowerCase()).filter(Boolean);
 const isAdmin = (env, p) => adminList(env).includes(p.email);
 
 async function auth(request, env) {
@@ -54,14 +55,14 @@ const entryOut = (e) => ({ day: e.day, product_name: e.product_name, pitch: e.pi
 const publicEntry = (e) => ({ day: e.day, product_name: e.product_name, pitch: e.pitch, product_url: e.product_url, price: e.price, type: e.type, body: e.body, image: imgUrl(e.image_key) });
 const profileOut = (env, p) => ({ email: p.email, username: p.username, display_name: p.display_name, bio: p.bio, is_admin: isAdmin(env, p) });
 
-function validateEntry(d, publish) {
+function validateEntry(d, publish, skipSpam) {
   const e = {
     product_name: oneLine(d.product_name, 80), pitch: oneLine(d.pitch, 140), product_url: oneLine(d.product_url, 300),
     price: oneLine(d.price, 30), type: TYPES.includes(d.type) ? d.type : "Digital", body: clean(d.body, 8000),
   };
   if (e.product_url && !/^https:\/\/[^\s]+$/.test(e.product_url)) return { error: "Product link must start with https://" };
   if ((e.body.match(/https?:\/\//g) || []).length > 8) return { error: "Too many links in the post" };
-  if (SPAM.test(`${e.product_name} ${e.pitch} ${e.body}`)) return { error: "That post looks like spam" };
+  if (!skipSpam && SPAM.test(`${e.product_name} ${e.pitch} ${e.body}`)) return { error: "That post looks like spam" };
   if (publish) {
     if (!e.product_name) return { error: "Add the product name" };
     if (!e.pitch) return { error: "Add a one-line pitch" };
@@ -197,7 +198,7 @@ export default {
         if (perthMs() > EDIT_UNTIL) return json({ error: "The challenge is closed for edits" }, 403, o);
         const d = await readJson(request);
         if (!d) return json({ error: "invalid" }, 400, o);
-        const v = validateEntry(d, !!d.publish);
+        const v = validateEntry(d, !!d.publish, spamExempt(env).includes(me.email));
         if (v.error) return json({ error: v.error }, 400, o);
         if (d.publish && await limited(env, "pub:" + me.id, 40, 3600)) return json({ error: "slow_down" }, 429, o);
         const e = v.e, status = d.publish ? "published" : "draft";

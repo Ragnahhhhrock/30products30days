@@ -16,5 +16,6 @@ bucket_name = "30p30d-participant-images"
 
 [vars]
 ADMIN_EMAILS = "contact@30products30days.com"   # comma separated organiser emails
+SPAM_EXEMPT_EMAILS = "yes.thatmichael@gmail.com"   # approved participants whose posts skip the keyword spam check
 
 # Secret (set in the dashboard): TURNSTILE_SECRET
