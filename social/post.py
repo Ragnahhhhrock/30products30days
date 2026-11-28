@@ -22,7 +22,8 @@ from launchpost import parse, caption, alt_text
 
 API = os.environ.get("BUFFER_API_URL", "https://api.buffer.com")
 STATE = pathlib.Path(__file__).resolve().parent / "posted.json"
-PLATFORMS = (("facebook", "BUFFER_FACEBOOK_CHANNEL"), ("instagram", "BUFFER_INSTAGRAM_CHANNEL"))
+# Launch order: blog post, advent calendar entry, then Instagram, then Facebook. A failure stops the run, so Facebook never goes before Instagram.
+PLATFORMS = (("instagram", "BUFFER_INSTAGRAM_CHANNEL"), ("facebook", "BUFFER_FACEBOOK_CHANNEL"))
 
 def q(s):
     return json.dumps(s, ensure_ascii=False)

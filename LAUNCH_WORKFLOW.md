@@ -15,8 +15,8 @@ Follow "Advent calendar entries" in `CLAUDE.md`:
 - Insert it in that day's `.door__inside`, wrapped in a link to the product URL (not the blog post). Set `data-post="1"` on the door.
 - Re-run `python3 blog/build.py` and check the door opens on its date.
 
-## 3 and 4. Instagram and Facebook posts (automatic)
-Pushing the blog post to `main` triggers `.github/workflows/social-post.yml`, which:
+## 3. Instagram post, then 4. Facebook post (automatic)
+Order is fixed: blog post, advent entry, Instagram, Facebook. Push the blog post and the advent entry together (or the advent entry first). Pushing the blog post to `main` triggers `.github/workflows/social-post.yml`, which first checks the day's advent entry exists (it stops and posts nothing if not), then:
 - renders the square (1080x1080) image from the post's front matter (`social/render.py`, design-system tokens only);
 - queues it on the 30products30days Instagram account and Facebook page through Buffer (`social/post.py`; Buffer posts at each channel's next slot) with the daily caption:
   ```

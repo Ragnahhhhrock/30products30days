@@ -57,6 +57,19 @@ jobs:
           done < /tmp/posts.txt
           cat /tmp/posts.txt
 
+      - name: Check the advent entry is in place (blog, then advent, then social)
+        run: |
+          while read -r f; do
+            [ -z "$f" ] && continue
+            d=$(sed -n 's/^day: *//p' "$f" | head -1)
+            [ "$((10#$d))" -ge 1 ] || continue
+            t=$(printf 'day-%02d.svg' "$((10#$d))")
+            [ -f "advent/thumbs/$t" ] && grep -q "$t" advent/index.html || {
+              echo "Day $d has no advent calendar entry yet (advent/thumbs/$t linked from advent/index.html). Add it, push, then rerun."
+              exit 1
+            }
+          done < /tmp/posts.txt
+
       - name: Install renderer
         run: |
           pip install playwright
