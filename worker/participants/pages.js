@@ -114,6 +114,13 @@ function shareBar(url, text, heading) {
 
 const dayDate = (c, n) => { const d = new Date(c.start + (n - 1) * 864e5); return { iso: d.toISOString().slice(0, 10), label: d.getUTCDate() + " " + MONTHS[d.getUTCMonth()] }; };
 const progress = (n) => `<div class="l30-progress" role="progressbar" aria-valuemin="0" aria-valuemax="30" aria-valuenow="${n}" aria-label="${n} of 30 shipped"><div class="l30-progress__label">${n} OF 30 SHIPPED</div><div class="l30-progress__track"><div class="l30-progress__fill" style="width:${(n / 30 * 100).toFixed(1)}%"></div></div></div>`;
+const LINKS = [["website", "Website"], ["x_url", "X"], ["instagram_url", "Instagram"], ["linkedin_url", "LinkedIn"]];
+const profileLinks = (p) => LINKS.filter(([k]) => p[k] && /^https:\/\//.test(p[k]));
+const avatarAbs = (c, p) => (p.avatar_key ? `${c.api}/api/img/${p.avatar_key}` : null);
+const linksHtml = (p, name) => {
+  const l = profileLinks(p);
+  return l.length ? `<ul class="links" aria-label="Links for ${esc(name)}">${l.map(([k, label]) => `<li><a class="l30-btn l30-btn--secondary" href="${esc(p[k])}" target="_blank" rel="me noopener nofollow ugc" aria-label="${esc(name)}'s ${label} (opens in a new tab)">${label}</a></li>`).join("")}</ul>` : "";
+};
 const imgAbs = (c, e) => (e.image_key ? `${c.api}/api/img/${e.image_key}` : null);
 
 function tabs(user, cur) {
@@ -131,7 +138,7 @@ function notFound(c) {
 }
 
 async function loadPerson(c, env, user) {
-  const p = await env.DB.prepare("SELECT id, username, display_name, bio FROM participants WHERE username=? AND status='approved'").bind(user).first();
+  const p = await env.DB.prepare("SELECT id, username, display_name, bio, avatar_key, website, x_url, instagram_url, linkedin_url FROM participants WHERE username=? AND status='approved'").bind(user).first();
   if (!p) return null;
   const rows = await env.DB.prepare("SELECT * FROM entries WHERE participant_id=? AND status='published' AND hidden=0 AND day<=? ORDER BY day").bind(p.id, c.today).all();
   return { p, entries: rows.results };
@@ -158,6 +165,8 @@ export async function handlePublic(request, env, c) {
   const shipped = entries.length;
   const base = `/u/${user}/`;
   const bio = p.bio || "One product a day for thirty days.";
+  const avatar = avatarAbs(c, p);
+  const authorLd = { "@type": "Person", name, url: c.site + base, ...(avatar ? { image: avatar } : {}), ...(profileLinks(p).length ? { sameAs: profileLinks(p).map(([k]) => p[k]) } : {}) };
 
   if (sub && sub.startsWith("day-")) {
     const day = Number(dayStr), e = byDay[day];
@@ -176,12 +185,12 @@ ${shareBar(pageUrl, `Day ${t}: ${e.product_name} by ${name} #30products30days`, 
       path: path2, nav: "/community/", ogType: "article", image: img, body,
       title: `Day ${t}: ${e.product_name} by ${name} | 30 Products in 30 Days`, ogTitle: `Day ${t}: ${e.product_name}`, desc: e.pitch,
       ld: { "@context": "https://schema.org", "@type": "BlogPosting", headline: `Day ${t}: ${e.product_name}`, description: e.pitch, datePublished: d.iso, dateModified: new Date(e.updated_at * 1000).toISOString(),
-        url: pageUrl, mainEntityOfPage: pageUrl, image: img || c.site + "/social/og-image.png", author: { "@type": "Person", name, url: c.site + base },
+        url: pageUrl, mainEntityOfPage: pageUrl, image: img || c.site + "/social/og-image.png", author: authorLd,
         isPartOf: { "@type": "Blog", name: `${name}: 30 Products in 30 Days`, url: c.site + base }, publisher: { "@type": "Organization", name: "30 Products in 30 Days", url: c.site } },
     }));
   }
 
-  const hero = (label, h1) => `<header class="hero hero--advent"><div class="wrap"><p class="label">${label}</p><h1>${h1}</h1><p class="lead">${esc(bio)}</p>${progress(shipped)}</div></header>`;
+  const hero = (label, h1) => `<header class="hero hero--advent"><div class="wrap"><div class="who">${avatar ? `<img class="avatar" src="${esc(avatar)}" alt="${esc(name)}" width="96" height="96">` : ""}<div class="who__text"><p class="label">${label}</p><h1>${h1}</h1><p class="lead">${esc(bio)}</p></div></div>${linksHtml(p, name)}${progress(shipped)}</div></header>`;
   const noindex = shipped === 0;   // thin pages stay out of search until the first post opens
 
   if (sub === "advent") {
@@ -205,7 +214,7 @@ ${shareBar(pageUrl, `${name}'s 30 Products in 30 Days advent calendar #30product
       path: base + "advent/", noindex, body, script: `L30.wireDoors(${JSON.stringify(user)});`,
       title: `${name}'s advent calendar | 30 Products in 30 Days`, ogTitle: `${name}'s advent calendar`,
       desc: `${shipped} of 30 products shipped so far. Open a door a day to see what ${name} built for the 30 Products in 30 Days challenge.`,
-      ld: { "@context": "https://schema.org", "@type": "CollectionPage", name: `${name}'s advent calendar`, url: pageUrl, isPartOf: { "@type": "WebSite", name: "30 Products in 30 Days", url: c.site }, author: { "@type": "Person", name } },
+      ld: { "@context": "https://schema.org", "@type": "CollectionPage", name: `${name}'s advent calendar`, url: pageUrl, isPartOf: { "@type": "WebSite", name: "30 Products in 30 Days", url: c.site }, author: authorLd },
     }));
   }
 
@@ -225,7 +234,7 @@ ${shareBar(pageUrl, `${name}'s 30 Products in 30 Days blog #30products30days`, "
     path: base, noindex, body,
     title: `${name}'s blog | 30 Products in 30 Days`, ogTitle: `${name}'s 30 Products in 30 Days blog`,
     desc: p.bio ? `${p.bio} ${shipped} of 30 products shipped.` : `${shipped} of 30 products shipped. Follow ${name} through the 30 Products in 30 Days challenge.`,
-    ld: { "@context": "https://schema.org", "@type": "Blog", name: `${name}: 30 Products in 30 Days`, description: bio, url: pageUrl, author: { "@type": "Person", name },
+    ld: { "@context": "https://schema.org", "@type": "Blog", name: `${name}: 30 Products in 30 Days`, description: bio, url: pageUrl, author: authorLd,
       blogPost: entries.map((e) => ({ "@type": "BlogPosting", headline: `Day ${pad(e.day)}: ${e.product_name}`, url: `${c.site}${base}day-${pad(e.day)}/`, datePublished: dayDate(c, e.day).iso })) },
   }));
 }

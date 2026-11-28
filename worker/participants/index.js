@@ -10,6 +10,11 @@ const TYPES = ["Digital", "Physical", "Service"];
 const SPAM = /\b(seo|backlinks?|guest post|lead generation|first page of google|casino|forex|loan offer|crypto giveaway)\b/i;
 const EMAIL_RE = /^[^@\s]{1,64}@[^@\s]+\.[^@\s]{2,}$/;
 const USER_RE = /^[a-z0-9][a-z0-9-]{2,23}$/;
+const SOCIAL = {   // profile links: accept a handle or a link, store a clean https link
+  x: { hosts: ["x.com", "twitter.com"], base: "https://x.com/", handle: /^[A-Za-z0-9_]{1,15}$/, name: "X" },
+  instagram: { hosts: ["instagram.com"], base: "https://www.instagram.com/", handle: /^[A-Za-z0-9_.]{1,30}$/, name: "Instagram" },
+  linkedin: { hosts: ["linkedin.com"], base: "https://www.linkedin.com/in/", handle: /^[A-Za-z0-9-]{3,100}$/, name: "LinkedIn" },
+};
 const RESERVED = new Set(["admin", "api", "account", "calendar", "community", "blog", "advent", "register", "contact", "support", "help"]);
 
 import { handlePublic } from "./pages.js";
@@ -21,7 +26,7 @@ const perthDate = () => new Intl.DateTimeFormat("en-CA", { timeZone: "Australia/
 const perthMs = () => { const [y, m, d] = perthDate().split("-").map(Number); return Date.UTC(y, m - 1, d); };
 const todayDay = () => Math.floor((perthMs() - START) / 864e5) + 1;   // <=0 before start, >30 after
 
-const cors = (o) => ({ "Access-Control-Allow-Origin": o, "Access-Control-Allow-Methods": "GET, POST, PUT, PATCH, OPTIONS", "Access-Control-Allow-Headers": "Content-Type, Authorization", "Vary": "Origin" });
+const cors = (o) => ({ "Access-Control-Allow-Origin": o, "Access-Control-Allow-Methods": "GET, POST, PUT, PATCH, DELETE, OPTIONS", "Access-Control-Allow-Headers": "Content-Type, Authorization", "Vary": "Origin" });
 const json = (body, status, o) => new Response(JSON.stringify(body), { status: status || 200, headers: { "Content-Type": "application/json", "Cache-Control": "no-store", ...cors(o) } });
 const clean = (s, max) => String(s ?? "").replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/g, "").trim().slice(0, max);
 const oneLine = (s, max) => clean(s, max).replace(/\s+/g, " ");
@@ -56,7 +61,31 @@ async function auth(request, env) {
 const imgUrl = (k) => (k ? `/api/img/${k}` : null);
 const entryOut = (e) => ({ day: e.day, product_name: e.product_name, pitch: e.pitch, product_url: e.product_url, price: e.price, type: e.type, body: e.body, image: imgUrl(e.image_key), status: e.status, hidden: !!e.hidden, updated_at: e.updated_at });
 const publicEntry = (e) => ({ day: e.day, product_name: e.product_name, pitch: e.pitch, product_url: e.product_url, price: e.price, type: e.type, body: e.body, image: imgUrl(e.image_key) });
-const profileOut = (env, p) => ({ email: p.email, username: p.username, display_name: p.display_name, bio: p.bio, is_admin: isAdmin(env, p) });
+const linksOut = (p) => ({ website: p.website || "", x: p.x_url || "", instagram: p.instagram_url || "", linkedin: p.linkedin_url || "" });
+const profileOut = (env, p) => ({ email: p.email, username: p.username, display_name: p.display_name, bio: p.bio, avatar: imgUrl(p.avatar_key), ...linksOut(p), is_admin: isAdmin(env, p) });
+const publicProfile = (p) => ({ username: p.username, display_name: p.display_name, bio: p.bio, avatar: imgUrl(p.avatar_key), ...linksOut(p) });
+
+// Returns { v } with the cleaned https link ("" when blank), or { error }.
+function websiteUrl(raw) {
+  const s = oneLine(raw, 300);
+  if (!s) return { v: "" };
+  if (/^[a-z][a-z0-9+.-]*:/i.test(s) && !/^https:\/\//i.test(s)) return { error: "Website must start with https://" };
+  let u; try { u = new URL(/^https:\/\//i.test(s) ? s : "https://" + s); } catch { return { error: "That website link doesn't look right" }; }
+  if (u.protocol !== "https:" || !u.hostname.includes(".") || u.username || u.password) return { error: "That website link doesn't look right" };
+  u.hash = "";
+  return { v: u.href.slice(0, 300) };
+}
+function socialUrl(raw, kind) {
+  const c = SOCIAL[kind], s = oneLine(raw, 300);
+  if (!s) return { v: "" };
+  const h = s.replace(/^@/, "");
+  if (c.handle.test(h)) return { v: c.base + h };
+  let u; try { u = new URL(/^https?:\/\//i.test(s) ? s : "https://" + s); } catch { return { error: `Add your ${c.name} handle or profile link` }; }
+  const host = u.hostname.toLowerCase();
+  if (u.protocol !== "https:" && u.protocol !== "http:") return { error: `Add your ${c.name} handle or profile link` };
+  if (!c.hosts.some((d) => host === d || host.endsWith("." + d)) || u.pathname.length < 2) return { error: `Use your ${c.name} handle or a link on ${c.hosts[0]}` };
+  return { v: `https://${host}${u.pathname.replace(/\/+$/, "")}`.slice(0, 200) };
+}
 
 function validateEntry(d, publish, skipSpam) {
   const e = {
@@ -124,19 +153,19 @@ export default {
       if (request.method === "GET" && path === "/api/public/participants") {
         const td = todayDay();
         const rows = await env.DB.prepare(
-          `SELECT p.username, p.display_name, COUNT(e.id) AS shipped, MAX(e.day) AS latest_day
+          `SELECT p.username, p.display_name, p.avatar_key, COUNT(e.id) AS shipped, MAX(e.day) AS latest_day
            FROM participants p LEFT JOIN entries e ON e.participant_id=p.id AND e.status='published' AND e.hidden=0 AND e.day<=?
            WHERE p.status='approved' AND p.username IS NOT NULL GROUP BY p.id ORDER BY shipped DESC, p.display_name`
         ).bind(td).all();
-        return json({ today_day: td, participants: rows.results }, 200, o);
+        return json({ today_day: td, participants: rows.results.map(({ avatar_key, ...r }) => ({ ...r, avatar: imgUrl(avatar_key) })) }, 200, o);
       }
       let m = path.match(/^\/api\/public\/u\/([a-z0-9-]{3,24})$/);
       if (request.method === "GET" && m) {
         const td = todayDay();
-        const p = await env.DB.prepare("SELECT id, username, display_name, bio FROM participants WHERE username=? AND status='approved'").bind(m[1]).first();
+        const p = await env.DB.prepare("SELECT id, username, display_name, bio, avatar_key, website, x_url, instagram_url, linkedin_url FROM participants WHERE username=? AND status='approved'").bind(m[1]).first();
         if (!p) return json({ error: "not_found" }, 404, o);
         const rows = await env.DB.prepare("SELECT * FROM entries WHERE participant_id=? AND status='published' AND hidden=0 AND day<=? ORDER BY day").bind(p.id, td).all();
-        return json({ today_day: td, profile: { username: p.username, display_name: p.display_name, bio: p.bio }, entries: rows.results.map(publicEntry) }, 200, o);
+        return json({ today_day: td, profile: publicProfile(p), entries: rows.results.map(publicEntry) }, 200, o);
       }
 
       // ---------- login ----------
@@ -196,7 +225,34 @@ export default {
         if (!display) return json({ error: "Add a display name" }, 400, o);
         const clash = await env.DB.prepare("SELECT id FROM participants WHERE username=? AND id<>?").bind(username, me.id).first();
         if (clash) return json({ error: "That username is taken" }, 409, o);
-        await env.DB.prepare("UPDATE participants SET username=?, display_name=?, bio=? WHERE id=?").bind(username, display, bio, me.id).run();
+        // Links are optional: a field left out keeps its saved value, an empty string clears it.
+        const web = d.website === undefined ? { v: me.website || "" } : websiteUrl(d.website);
+        if (web.error) return json({ error: web.error }, 400, o);
+        const soc = {};
+        for (const k of Object.keys(SOCIAL)) {
+          const cur = me[k + "_url"] || "";
+          soc[k] = d[k] === undefined ? { v: cur } : socialUrl(d[k], k);
+          if (soc[k].error) return json({ error: soc[k].error }, 400, o);
+        }
+        await env.DB.prepare("UPDATE participants SET username=?, display_name=?, bio=?, website=?, x_url=?, instagram_url=?, linkedin_url=? WHERE id=?")
+          .bind(username, display, bio, web.v, soc.x.v, soc.instagram.v, soc.linkedin.v, me.id).run();
+        return json({ ok: true }, 200, o);
+      }
+      if (request.method === "POST" && path === "/api/me/avatar") {
+        if (await limited(env, "av:" + me.id, 20, 3600)) return json({ error: "slow_down" }, 429, o);
+        const buf = await request.arrayBuffer();
+        if (buf.byteLength > 2 * 1024 * 1024) return json({ error: "Image must be 2 MB or smaller" }, 413, o);
+        const kind = sniffImage(new Uint8Array(buf));
+        if (!kind) return json({ error: "Use a PNG, JPG or WebP image" }, 400, o);
+        const key = `${me.id}/avatar-${rand().slice(0, 16)}.${kind[0]}`;
+        await env.IMAGES.put(key, buf, { httpMetadata: { contentType: kind[1] } });
+        if (me.avatar_key) await env.IMAGES.delete(me.avatar_key);
+        await env.DB.prepare("UPDATE participants SET avatar_key=? WHERE id=?").bind(key, me.id).run();
+        return json({ ok: true, avatar: imgUrl(key) }, 200, o);
+      }
+      if (request.method === "DELETE" && path === "/api/me/avatar") {
+        if (me.avatar_key) await env.IMAGES.delete(me.avatar_key);
+        await env.DB.prepare("UPDATE participants SET avatar_key=NULL WHERE id=?").bind(me.id).run();
         return json({ ok: true }, 200, o);
       }
 
@@ -288,7 +344,7 @@ export default {
 };
 
 async function serveImage(env, key) {
-  if (!/^\d+\/\d{1,2}-[A-Za-z0-9_-]{16}\.(png|jpg|webp)$/.test(key)) return new Response("Not found", { status: 404 });
+  if (!/^\d+\/(\d{1,2}|avatar)-[A-Za-z0-9_-]{16}\.(png|jpg|webp)$/.test(key)) return new Response("Not found", { status: 404 });
   const obj = await env.IMAGES.get(key);
   if (!obj) return new Response("Not found", { status: 404 });
   return new Response(obj.body, { headers: {

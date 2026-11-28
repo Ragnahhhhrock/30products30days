@@ -5,6 +5,11 @@ CREATE TABLE IF NOT EXISTS participants (
   username TEXT UNIQUE,
   display_name TEXT,
   bio TEXT,
+  avatar_key TEXT,                           -- R2 key of the profile picture
+  website TEXT,                              -- https link
+  x_url TEXT,
+  instagram_url TEXT,
+  linkedin_url TEXT,
   status TEXT NOT NULL DEFAULT 'approved',   -- approved | suspended
   created_at INTEGER NOT NULL
 );

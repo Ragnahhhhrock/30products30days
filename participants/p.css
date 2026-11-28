@@ -177,3 +177,17 @@
   .share .l30-btn{min-height:44px;padding:8px 16px;font-size:15px}
   .share__msg{margin:var(--space-2) 0 0;min-height:1.6em;font-weight:700;font-size:15px}
   .actions--tabs{margin:0 0 var(--space-4)}
+
+  /* profile picture and links */
+  .avatar{display:block;flex:none;width:96px;height:96px;border-radius:50%;object-fit:cover;background:#FFFFFF;border:var(--border-w) solid var(--outline);box-shadow:var(--shadow-hard-sm)}
+  .avatar--sm{width:56px;height:56px}
+  .hero .avatar{border-color:#0F1B3D;box-shadow:4px 4px 0 0 #0F1B3D}
+  .who{display:flex;gap:var(--space-4);align-items:center;flex-wrap:wrap}
+  .who__text{flex:1 1 320px;min-width:0}
+  .links{list-style:none;margin:var(--space-4) 0 0;padding:0;display:flex;flex-wrap:wrap;gap:var(--space-2)}
+  .links .l30-btn{width:auto;min-height:44px;padding:8px 16px;font-size:15px}
+  .person--av{display:flex;gap:var(--space-3);align-items:center}
+  .avatar-edit{display:flex;gap:var(--space-3);align-items:center;flex-wrap:wrap}
+  .avatar-edit .avatar{width:96px;height:96px}
+  .avatar-edit .l30-btn{width:auto}
+  .avatar-ph{display:flex;align-items:center;justify-content:center;font:800 32px/1 var(--font-display);background:var(--brand-launch);color:#0F1B3D}

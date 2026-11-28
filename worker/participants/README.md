@@ -11,6 +11,9 @@ Powers `/account/`, the public pages `/u/<username>/` (blog), `/u/<username>/adv
 6. `npx wrangler deploy`. If the workers.dev URL differs from `30p30d-participants.malgordonperth.workers.dev`, update `API` in `participants/p.js`.
 7. Sign in at `/account/` with an organiser email, open `/admin/`, and paste the registrant emails to approve them.
 
+## Profile picture and links
+Participants can add a profile picture (PNG, JPG or WebP, 2 MB or less, stored in R2) and links to a personal site, X, Instagram and LinkedIn from `/account/`. Handles are turned into clean https links on save and only the matching site is accepted. They show in the hero of the public blog and advent pages (with `sameAs` in the page's JSON-LD) and the picture shows on the community list. **Existing database:** run `npx wrangler d1 execute 30p30d-participants --remote --file=migrations/001-profile-picture-and-links.sql` before deploying the Worker.
+
 ## Notes
 - Only approved emails receive a link; the login response is identical for everyone else.
 - Link tokens are single use, expire in 15 minutes, and live in the URL fragment. Sessions last 30 days and are stored hashed.
