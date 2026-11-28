@@ -30,6 +30,9 @@ Order is fixed: blog post, advent entry, Instagram, Facebook, LinkedIn. Push the
 
 Before pushing, preview the image: `python3 social/render.py blog/posts/day-NN-name.md out.png`. Check the run in the repo's Actions tab after the push. Requires secret `BUFFER_API_KEY` (the channel ids are built into the workflow). Test without posting via the workflow's manual run with `dry_run` on.
 
+## 5b. Participant page (automatic)
+Pushing the blog post to `main` also runs `.github/workflows/sync-participant.yml`, which publishes the same post to `/u/malgordon/` (blog list, post page and advent door) through the Worker's `POST /api/sync/entry` (`social/sync_participant.py`). Requires repo secret `PARTICIPANT_SYNC_TOKEN` = Worker secret `SYNC_TOKEN`. The door opens on its date (Perth time); public pages cache for 5 minutes. Test with the workflow's manual run (`dry_run` on).
+
 ## 6. Commit and push
 Commit the blog post, advent entry and thumbnail, and push to `main` on this repo. This push triggers the social posts.
 
@@ -37,4 +40,5 @@ Commit the blog post, advent entry and thumbnail, and push to `main` on this rep
 - [ ] Blog post built, no placeholders
 - [ ] Advent thumbnail + link + `data-post="1"`
 - [ ] Social workflow run succeeded (Instagram, Facebook, LinkedIn)
+- [ ] Participant sync run succeeded (`/u/malgordon/` shows the post)
 - [ ] Committed and pushed

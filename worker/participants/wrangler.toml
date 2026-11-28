@@ -28,4 +28,6 @@ bucket_name = "30p30d-participant-images"
 ADMIN_EMAILS = "contact@30products30days.com"   # comma separated organiser emails
 SPAM_EXEMPT_EMAILS = "yes.thatmichael@gmail.com"   # approved participants whose posts skip the keyword spam check
 
-# Secret (set in the dashboard): TURNSTILE_SECRET
+SYNC_USERNAME = "malgordon"   # the only profile the launch workflow may write to (POST /api/sync/entry)
+
+# Secrets (set in the dashboard): TURNSTILE_SECRET, SYNC_TOKEN (same value as the repo secret PARTICIPANT_SYNC_TOKEN)

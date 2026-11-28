@@ -108,6 +108,8 @@ export default {
       try { return await handlePublic(request, env, { site: SITE, api: API_ORIGIN, start: START, today: todayDay() }); }
       catch (err) { return new Response("Server error", { status: 500, headers: { "Cache-Control": "no-store" } }); }
     }
+    // Server-to-server sync from the main site's launch workflow (GitHub Actions). Not browser-facing: bearer SYNC_TOKEN, no Origin check.
+    if (url.pathname === "/api/sync/entry") return syncEntry(request, env);
     const origin = request.headers.get("Origin") || "";
     const isImg = url.pathname.startsWith("/api/img/");
     if (request.method === "OPTIONS") return ORIGINS.includes(origin) ? new Response(null, { status: 204, headers: cors(origin) }) : new Response("Forbidden", { status: 403 });
@@ -293,4 +295,33 @@ async function serveImage(env, key) {
     "Content-Type": obj.httpMetadata.contentType, "X-Content-Type-Options": "nosniff", "Cache-Control": "public, max-age=3600",
     "Access-Control-Allow-Origin": "*", "Cross-Origin-Resource-Policy": "cross-origin", "Content-Security-Policy": "default-src 'none'",
   } });
+}
+
+// POST /api/sync/entry  { username, day, product_name, pitch, product_url, price, type, body }
+// Upserts and publishes that day's entry on the participant's page (blog post + advent door). Idempotent; keeps any admin "hidden" flag.
+// Only the account named in SYNC_USERNAME can be written, and only with the SYNC_TOKEN secret.
+async function syncEntry(request, env) {
+  const jr = (b, st) => new Response(JSON.stringify(b), { status: st || 200, headers: { "Content-Type": "application/json", "Cache-Control": "no-store" } });
+  if (request.method !== "POST") return jr({ error: "method" }, 405);
+  const given = (request.headers.get("Authorization") || "").replace(/^Bearer /, "");
+  const want = String(env.SYNC_TOKEN || "");
+  if (want.length < 32 || (await sha(given)) !== (await sha(want))) return jr({ error: "auth" }, 401);
+  const d = await readJson(request);
+  if (!d) return jr({ error: "invalid" }, 400);
+  const username = clean(d.username, 24).toLowerCase();
+  const day = Number(d.day);
+  if (!username || username !== String(env.SYNC_USERNAME || "").toLowerCase()) return jr({ error: "username_not_allowed" }, 403);
+  if (!Number.isInteger(day) || day < 1 || day > 30) return jr({ error: "invalid_day" }, 400);
+  const p = await env.DB.prepare("SELECT id FROM participants WHERE username=? AND status='approved'").bind(username).first();
+  if (!p) return jr({ error: "participant_not_found" }, 404);
+  const v = validateEntry(d, true, true);
+  if (v.error) return jr({ error: v.error }, 400);
+  const e = v.e;
+  await env.DB.prepare(
+    `INSERT INTO entries (participant_id, day, product_name, pitch, product_url, price, type, body, status, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'published', ?)
+     ON CONFLICT (participant_id, day) DO UPDATE SET product_name=excluded.product_name, pitch=excluded.pitch, product_url=excluded.product_url,
+       price=excluded.price, type=excluded.type, body=excluded.body, status='published', updated_at=excluded.updated_at`
+  ).bind(p.id, day, e.product_name, e.pitch, e.product_url, e.price, e.type, e.body, nowSec()).run();
+  return jr({ ok: true, username, day, reveals_on_day: day, today_day: todayDay() });
 }

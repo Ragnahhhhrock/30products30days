@@ -1,0 +1,68 @@
+name: Sync launch to participant page
+
+# When a launch blog post lands on main, publish the same post (and so the advent door) on the organiser's
+# participant page, /u/malgordon/. Runs independently of the social posts.
+# Needs: secret PARTICIPANT_SYNC_TOKEN (same value as the Worker secret SYNC_TOKEN).
+on:
+  push:
+    branches: [main]
+    paths: ['blog/posts/day-*.md']
+  workflow_dispatch:
+    inputs:
+      post:
+        description: 'Post file, e.g. blog/posts/day-07-name.md'
+        required: true
+      dry_run:
+        description: 'Print the payload only; do not publish'
+        type: boolean
+        default: true
+
+concurrency:
+  group: sync-participant
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Find launch posts
+        env:
+          EVENT: ${{ github.event_name }}
+          INPUT_POST: ${{ inputs.post }}
+        run: |
+          if [ "$EVENT" = "workflow_dispatch" ]; then
+            printf '%s\n' "$INPUT_POST" > /tmp/posts.txt
+          else
+            git diff --name-only --diff-filter=AM HEAD^ HEAD -- 'blog/posts/day-*.md' > /tmp/posts.txt
+          fi
+          while read -r f; do
+            [ -z "$f" ] && continue
+            echo "$f" | grep -Eq '^blog/posts/day-[0-9]+-[a-z0-9-]+\.md$' || { echo "Bad post path: $f"; exit 1; }
+            [ -f "$f" ] || { echo "Missing: $f"; exit 1; }
+          done < /tmp/posts.txt
+          cat /tmp/posts.txt
+
+      - name: Publish to /u/malgordon/
+        env:
+          PARTICIPANT_SYNC_TOKEN: ${{ secrets.PARTICIPANT_SYNC_TOKEN }}
+          DRY: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run || 'false' }}
+        run: |
+          while read -r f; do
+            [ -z "$f" ] && continue
+            # Day 0 (event announcement) is not a product launch.
+            d=$(sed -n 's/^day: *//p' "$f" | head -1)
+            [ "$((10#$d))" -ge 1 ] || { echo "Skipping $f (day 0)"; continue; }
+            flags=""; [ "$DRY" = "true" ] && flags="--dry-run"
+            python3 social/sync_participant.py "$f" $flags
+          done < /tmp/posts.txt
