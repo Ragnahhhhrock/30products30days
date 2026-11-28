@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<title>30 Products in 30 Days: explainer</title>
+<style>
+@font-face{font-family:"Bricolage Grotesque";font-weight:800;src:url(../design-system/fonts/BricolageGrotesque-ExtraBold.ttf)}
+@font-face{font-family:"DM Sans";font-weight:500;src:url(../design-system/fonts/DMSans-Medium.ttf)}
+@font-face{font-family:"DM Sans";font-weight:700;src:url(../design-system/fonts/DMSans-Bold.ttf)}
+:root{--ink:#0F1B3D;--launch:#FFD21F;--flamingo:#FF6F91;--orbit:#4B5BFF;--cloud:#F2F5FA;--card:#fff}
+*{box-sizing:border-box;margin:0}
+html,body{width:1280px;height:720px;overflow:hidden;background:var(--launch);font-family:"DM Sans",Arial,sans-serif;color:var(--ink)}
+.scene{position:absolute;inset:0;opacity:0}
+.disp{font:800 120px/.95 "Bricolage Grotesque","Arial Black",sans-serif;letter-spacing:-5px}
+.cap{font:700 22px/1 "DM Sans";letter-spacing:2px;text-transform:uppercase}
+.box{background:var(--card);border:3px solid var(--ink);border-radius:20px;box-shadow:8px 8px 0 0 var(--ink)}
+.pill{display:inline-block;border:3px solid var(--ink);border-radius:999px;padding:12px 30px;font:800 40px/1 "Bricolage Grotesque";box-shadow:4px 4px 0 0 var(--ink)}
+.mark{background:var(--flamingo);padding:0 20px;border-radius:12px;display:inline-block}
+.center{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:28px}
+.tile{position:absolute;width:112px;height:80px;border:3px solid var(--ink);border-radius:12px;display:flex;align-items:center;justify-content:center;font:800 30px/1 "Bricolage Grotesque";background:var(--card);border-style:dashed}
+</style></head><body>
+<!-- Scene 1: the hook -->
+<div class="scene center" id="s1">
+  <div class="cap" id="s1cap">A public challenge</div>
+  <div class="disp" id="s1a">30 products.</div>
+  <div class="disp" id="s1b"><span class="mark">30 days.</span></div>
+</div>
+<!-- Scene 2: one a day -->
+<div class="scene" id="s2">
+  <div style="position:absolute;left:0;right:0;top:52px;text-align:center"><div class="cap">Every single day</div>
+  <div class="disp" style="font-size:78px;margin-top:14px;letter-spacing:-3px">One product a day.</div></div>
+  <div id="tiles"></div>
+  <div id="counter" style="position:absolute;left:0;right:0;bottom:44px;text-align:center" class="cap"></div>
+</div>
+<!-- Scene 3: any kind -->
+<div class="scene center" id="s3">
+  <div class="cap">What counts</div>
+  <div class="disp" style="font-size:84px;letter-spacing:-3px">Build anything.</div>
+  <div style="display:flex;gap:28px;margin-top:10px">
+    <span class="pill" id="p1" style="background:var(--card)">Digital</span>
+    <span class="pill" id="p2" style="background:var(--flamingo)">Physical</span>
+    <span class="pill" id="p3" style="background:var(--orbit);color:#fff">Service</span>
+  </div>
+</div>
+<!-- Scene 4: blog post launch -->
+<div class="scene center" id="s4">
+  <div class="cap" id="s4cap">How you follow along</div>
+  <div class="box" id="post" style="width:760px;text-align:left;overflow:hidden">
+    <div style="background:var(--flamingo);border-bottom:3px solid var(--ink);padding:16px 28px" class="cap">Launch post</div>
+    <div style="padding:28px 32px;display:flex;gap:28px;align-items:center">
+      <div id="postbadge" style="flex:none;width:120px;height:120px;border-radius:50%;background:var(--launch);border:5px solid var(--ink);box-shadow:6px 6px 0 0 var(--ink);display:flex;align-items:center;justify-content:center;font:800 54px/1 'Bricolage Grotesque';letter-spacing:-2px">07</div>
+      <div><div class="disp" style="font-size:52px;letter-spacing:-2px">Day 07: Product name here.</div>
+      <div style="font:500 24px/1.3 'DM Sans';margin-top:10px">Made today, live tonight.</div></div>
+    </div>
+  </div>
+  <div class="disp" style="font-size:54px;letter-spacing:-2px" id="s4b">One launch. One blog post.</div>
+</div>
+<!-- Scene 5: CTA -->
+<div class="scene center" id="s5">
+  <div class="cap">Starts Saturday 28 November 2026</div>
+  <div class="disp" style="font-size:96px">Follow<br>along.</div>
+  <span class="pill" id="cta" style="background:var(--orbit);color:#fff;font-size:36px">30products30days.com</span>
+</div>
+<script>
+const clamp=(x,a=0,b=1)=>Math.min(b,Math.max(a,x));
+const ease=x=>1-Math.pow(1-clamp(x),3);
+const back=x=>{x=clamp(x);const c=1.9;return 1+(c+1)*Math.pow(x-1,3)+c*Math.pow(x-1,2)};
+const $=id=>document.getElementById(id);
+// 30 tiles layout: 10 columns x 3 rows
+const T=$('tiles');
+for(let i=0;i<30;i++){const d=document.createElement('div');d.className='tile';d.id='t'+i;
+ d.style.left=(40+(i%10)*121)+'px';d.style.top=(262+Math.floor(i/10)*104)+'px';d.textContent=String(i+1).padStart(2,'0');T.appendChild(d)}
+const D=18; // seconds, loops
+const scenes=[['s1',0,3.6],['s2',3.6,8.2],['s3',8.2,11.8],['s4',11.8,15.4],['s5',15.4,18]];
+function show(id,t,a,b){ // fade/slide in & out
+  const el=$(id);const inn=clamp((t-a)/0.35),out=clamp((b-t)/0.3);
+  el.style.opacity=(t>=a&&t<b)?Math.min(inn,out):0;}
+function render(t){
+  t=t%D;
+  scenes.forEach(([id,a,b])=>show(id,t,a,b));
+  // S1
+  let l=t-0;
+  $('s1cap').style.opacity=ease(l/0.4);
+  const a1=back((l-0.3)/0.55);$('s1a').style.transform=`translateY(${(1-a1)*80}px) scale(${.85+.15*a1})`;$('s1a').style.opacity=clamp((l-0.3)/0.2);
+  const b1=back((l-1.2)/0.55);$('s1b').style.transform=`translateY(${(1-b1)*80}px) rotate(${-2*b1}deg) scale(${.85+.15*b1})`;$('s1b').style.opacity=clamp((l-1.2)/0.2);
+  // S2: tiles fill 1/day
+  l=t-3.6;const n=Math.floor(clamp((l-0.9)/3.0)*30+0.0001);
+  for(let i=0;i<30;i++){const e=$('t'+i);const on=i<n;const age=clamp((l-0.9)/3.0*30-i);
+    e.style.background=on?(i===29?'var(--flamingo)':'var(--launch)'):'var(--card)';e.style.borderStyle=on?'solid':'dashed';
+    e.style.boxShadow=on?'4px 4px 0 0 var(--ink)':'none';e.style.transform=on?`scale(${1+0.12*(1-ease(age))})`:'scale(1)';e.style.opacity=1}
+  $('counter').textContent=n>0?`${n} of 30 shipped`:'0 of 30 shipped';
+  // S3 pills
+  l=t-8.2;[['p1',0.5],['p2',0.9],['p3',1.3]].forEach(([id,d],k)=>{const v=back((l-d)/0.5);$(id).style.transform=`scale(${v}) rotate(${(k-1)*3*v}deg)`;$(id).style.opacity=clamp((l-d)/0.15)});
+  // S4 post card
+  l=t-11.8;const pc=back((l-0.3)/0.6);$('post').style.transform=`translateY(${(1-pc)*120}px)`;$('post').style.opacity=clamp((l-0.3)/0.2);
+  $('postbadge').style.transform=`rotate(${(1-ease((l-0.7)/0.5))*-40}deg) scale(${.6+.4*back((l-0.7)/0.5)})`;
+  const s4b=back((l-1.5)/0.5);$('s4b').style.transform=`translateY(${(1-s4b)*40}px)`;$('s4b').style.opacity=clamp((l-1.5)/0.2);
+  // S5
+  l=t-15.4;const cv=back((l-0.9)/0.5);$('cta').style.transform=`scale(${.7+.3*cv})`;$('cta').style.opacity=clamp((l-0.9)/0.2);
+}
+window.render=render;render(0);
+// live preview when opened normally (not driven by the renderer)
+if(!/[?&]capture/.test(location.search)){const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+ if(reduce){render(2.6)}else{const s=performance.now();(function f(){render((performance.now()-s)/1000);requestAnimationFrame(f)})()}}
+</script></body></html>
