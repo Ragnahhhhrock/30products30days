@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-FM1RLPT7RK"></script>
+<script>
+window.dataLayer=window.dataLayer||[];
+function gtag(){dataLayer.push(arguments);}
+gtag('js',new Date());
+gtag('config','G-FM1RLPT7RK');
+</script>
+<script src="/analytics.js" defer></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Add the badge | 30 Products in 30 Days</title>
+<meta name="description" content="Taking part in 30 Products in 30 Days? Copy this button onto your product page so visitors can find the challenge.">
+<meta name="theme-color" content="#FFD21F">
+<link rel="canonical" href="https://30products30days.com/badge/">
+<link rel="stylesheet" href="/design-system/components/bundle.css">
+<style>
+  @font-face{font-family:"Bricolage Grotesque";font-weight:800;src:url(/design-system/fonts/BricolageGrotesque-ExtraBold.ttf) format("truetype");font-display:swap}
+  @font-face{font-family:"DM Sans";font-weight:400;src:url(/design-system/fonts/DMSans-Regular.ttf) format("truetype");font-display:swap}
+  @font-face{font-family:"DM Sans";font-weight:700;src:url(/design-system/fonts/DMSans-Bold.ttf) format("truetype");font-display:swap}
+  :root{
+    --surface-page:#F2F5FA;--surface-card:#FFFFFF;--ink:#0F1B3D;--ink-muted:#33415F;--outline:#0F1B3D;
+    --brand-launch:#FFD21F;--brand-flamingo:#FF6F91;--brand-orbit:#4B5BFF;--on-orbit:#FFFFFF;
+    --link:#3A49E6;--focus-ring:#3A49E6;
+    --font-display:"Bricolage Grotesque","Arial Black",Arial,sans-serif;--font-body:"DM Sans",Arial,sans-serif;
+    --space-1:4px;--space-2:8px;--space-3:16px;--space-4:24px;--space-5:40px;--space-6:64px;
+    --radius-sm:12px;--radius-md:20px;--radius-lg:28px;--radius-pill:999px;
+    --shadow-hard-sm:4px 4px 0 0 #0F1B3D;--shadow-hard-md:8px 8px 0 0 #0F1B3D;--border-w:3px;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{--surface-page:#0B1330;--surface-card:#16234F;--ink:#F2F5FA;--ink-muted:#B9C3DD;--outline:#F2F5FA;
+      --link:#A5AFFF;--focus-ring:#FFD21F;--shadow-hard-sm:4px 4px 0 0 #050A1F;--shadow-hard-md:8px 8px 0 0 #050A1F}
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--surface-page);color:var(--ink);font:400 16px/1.55 var(--font-body)}
+  .wrap{max-width:640px;margin:0 auto;padding:var(--space-5) var(--space-3) var(--space-6)}
+  .label{font:700 13px/1.3 var(--font-body);letter-spacing:2px;text-transform:uppercase;margin:0 0 var(--space-2)}
+  h1{font:800 clamp(36px,9vw,56px)/1 var(--font-display);letter-spacing:-2px;margin:0 0 var(--space-3)}
+  h1 mark{background:var(--brand-launch);color:#0F1B3D;padding:0 10px;border-radius:var(--radius-sm)}
+  .lead{font-size:20px;line-height:1.55;margin:0 0 var(--space-4);color:var(--ink-muted)}
+  .panel{background:var(--surface-card);border:var(--border-w) solid var(--outline);border-radius:var(--radius-lg);box-shadow:var(--shadow-hard-md);overflow:hidden;margin-bottom:var(--space-4)}
+  .panel__head{background:var(--brand-flamingo);color:#0F1B3D;border-bottom:var(--border-w) solid var(--outline);padding:20px var(--space-4);font:800 22px/1.15 var(--font-display);letter-spacing:-.5px}
+  .panel__body{padding:var(--space-4);display:flex;flex-direction:column;gap:var(--space-3)}
+  .opts{display:flex;flex-wrap:wrap;gap:var(--space-2);border:0;padding:0;margin:0;min-width:0}
+  .opts legend{font:700 16px/1.3 var(--font-body);padding:0 0 var(--space-2)}
+  .opts label{position:relative;cursor:pointer}
+  .opts input{position:absolute;opacity:0;inset:0;width:100%;height:100%;margin:0;cursor:pointer}
+  .opts span{display:inline-flex;align-items:center;min-height:44px;padding:8px 18px;font:700 15px/1 var(--font-body);border:var(--border-w) dashed var(--outline);border-radius:var(--radius-pill);background:var(--surface-card);color:var(--ink)}
+  .opts input:checked + span{background:var(--ink);color:var(--surface-card);border-style:solid}
+  .opts input:focus-visible + span{outline:3px solid var(--focus-ring);outline-offset:3px}
+  .stage{display:flex;align-items:center;justify-content:center;min-height:120px;padding:var(--space-4);border:var(--border-w) dashed var(--outline);border-radius:var(--radius-md)}
+  .stage[data-bg="light"]{background:#F2F5FA}
+  .stage[data-bg="dark"]{background:#0B1330}
+  label.code{font:700 16px/1.3 var(--font-body)}
+  textarea{width:100%;min-height:200px;padding:10px 14px;font:400 14px/1.5 ui-monospace,Menlo,Consolas,monospace;color:var(--ink);background:var(--surface-card);border:var(--border-w) solid var(--outline);border-radius:var(--radius-sm);resize:vertical}
+  textarea:focus-visible{outline:3px solid var(--focus-ring);outline-offset:2px}
+  .status{min-height:24px;font-weight:700;margin:0}
+  .steps{margin:0;padding-left:var(--space-4)}
+  .steps li{margin-bottom:var(--space-2)}
+  a{color:var(--link)}
+  a:focus-visible{outline:3px solid var(--focus-ring);outline-offset:2px}
+  .foot{color:var(--ink-muted);font-size:14px}
+  @media (prefers-reduced-motion:reduce){.l30-btn{transition:none}}
+</style>
+<link rel="stylesheet" href="/site-nav.css">
+</head>
+<body>
+<header class="site-nav"><div class="site-nav__in"><a class="site-nav__brand" href="/"><img src="/brand/logos/launch-badge.svg" alt="" width="36" height="36"><span>30 Products 30 Days</span></a><nav aria-label="Main"><ul class="site-nav__list"><li><a class="site-nav__link" href="/">Home</a></li><li><a class="site-nav__link" href="/blog/">Blog</a></li><li><a class="site-nav__link" href="/advent/">Advent calendar</a></li><li><a class="site-nav__link" href="/community/">Community</a></li><li><a class="site-nav__link" href="/account/">My account</a></li><li><a class="site-nav__link" href="/#about">About</a></li><li><a class="site-nav__link" href="/register.html">Join</a></li><li><a class="site-nav__link" href="/#cf">Contact</a></li></ul></nav></div></header>
+<main class="wrap">
+  <p class="label">For participants</p>
+  <h1>Add the <mark>30</mark> badge</h1>
+  <p class="lead">Taking part? Put this button on your product page so visitors can find the challenge and your other launches. It takes 30 seconds.</p>
+
+  <div class="panel">
+    <div class="panel__head">Your button</div>
+    <div class="panel__body">
+      <fieldset class="opts">
+        <legend>Where will it sit?</legend>
+        <label><input type="radio" name="theme" value="light" checked><span>Light page</span></label>
+        <label><input type="radio" name="theme" value="dark"><span>Dark page</span></label>
+      </fieldset>
+      <div class="stage" id="stage" data-bg="light" aria-label="Button preview"></div>
+      <label class="code" for="code">Embed code</label>
+      <textarea id="code" readonly spellcheck="false"></textarea>
+      <button type="button" id="copy" class="l30-btn l30-btn--primary">Copy embed code</button>
+      <p class="status" id="msg" role="status" aria-live="polite"></p>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel__head">How to add it</div>
+    <div class="panel__body">
+      <ol class="steps">
+        <li>Copy the embed code.</li>
+        <li>Paste it into the HTML of your product page, footer or link-in-bio page.</li>
+        <li>Check it links to 30products30days.com, then tell us in your daily post if you like.</li>
+      </ol>
+      <p>No script, no tracking, no image to host. Can't paste HTML? Use a plain link: <a href="https://30products30days.com/?ref=badge">30products30days.com</a>.</p>
+    </div>
+  </div>
+
+  <p class="foot"><a href="/register.html">Join the challenge</a> &middot; <a href="/">Back to the challenge</a></p>
+</main>
+<script>
+(function(){
+  var SITE = "https://30products30days.com/?ref=badge";
+  var BADGE = "https://30products30days.com/brand/logos/launch-badge.svg";
+  var FONT = "'DM Sans',Arial,sans-serif";
+  var themes = {
+    light: {bg:"#FFD21F", fg:"#0F1B3D", edge:"#0F1B3D", shadow:"#0F1B3D"},
+    dark:  {bg:"#16234F", fg:"#F2F5FA", edge:"#F2F5FA", shadow:"#050A1F"}
+  };
+  function snippet(t){
+    var c = themes[t];
+    return '<a href="' + SITE + '" target="_blank" rel="noopener" ' +
+      'style="display:inline-flex;align-items:center;gap:10px;min-height:44px;padding:6px 20px 6px 8px;' +
+      'background:' + c.bg + ';color:' + c.fg + ';border:3px solid ' + c.edge + ';border-radius:999px;' +
+      'box-shadow:4px 4px 0 0 ' + c.shadow + ';font:700 15px/1.2 ' + FONT + ';text-decoration:none">' +
+      '<img src="' + BADGE + '" alt="" width="32" height="32" style="display:block">' +
+      '<span>Part of 30 Products 30 Days</span></a>';
+  }
+  var stage = document.getElementById("stage"), code = document.getElementById("code"), msg = document.getElementById("msg");
+  function render(){
+    var t = document.querySelector('input[name=theme]:checked').value;
+    var html = snippet(t);
+    stage.setAttribute("data-bg", t);
+    stage.innerHTML = html;
+    stage.querySelector("a").addEventListener("click", function(e){ e.preventDefault(); });
+    code.value = html;
+    msg.textContent = "";
+  }
+  document.querySelectorAll('input[name=theme]').forEach(function(r){ r.addEventListener("change", render); });
+  document.getElementById("copy").addEventListener("click", function(){
+    function ok(){ msg.textContent = "Copied. Paste it into your page."; if (window.track) track("badge_copy", {theme: document.querySelector('input[name=theme]:checked').value}); }
+    function fail(){ code.select(); msg.textContent = "Press Ctrl+C (or Cmd+C) to copy the selected code."; }
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(code.value).then(ok, fail);
+    else fail();
+  });
+  render();
+})();
+</script>
+</body>
+</html>
