@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /account/
+Disallow: /admin/
+Disallow: /calendar/
+
+Sitemap: https://30products30days.com/sitemap.xml
+Sitemap: https://30products30days.com/sitemap-participants.xml

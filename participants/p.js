@@ -55,6 +55,27 @@
       var el = document.getElementById("nav");
       if (el) el.innerHTML = '<div class="site-nav__in"><a class="site-nav__brand" href="/"><img src="/brand/logos/launch-badge.svg" alt="" width="36" height="36"><span>30 Products 30 Days</span></a><nav aria-label="Main"><ul class="site-nav__list">' + li + "</ul></nav></div>";
     },
+    // Resolves true once the server-rendered /u/<username>/ pages are live (the /u/ route redirects to /community/).
+    publicPages: function () {
+      if (!L._pp) L._pp = fetch("/u/", { method: "HEAD" }).then(function (r) { return r.ok; }).catch(function () { return false; });
+      return L._pp;
+    },
+    // Share bars: reveal the copy-link and native-share buttons when the browser supports them.
+    wireShare: function () {
+      document.querySelectorAll(".share").forEach(function (bar) {
+        var url = bar.getAttribute("data-share-url"), text = bar.getAttribute("data-share-text"), msg = bar.querySelector(".share__msg");
+        function say(t) { if (msg) { msg.textContent = t; setTimeout(function () { msg.textContent = ""; }, 3000); } }
+        var copy = bar.querySelector("[data-copy-link]"), nat = bar.querySelector("[data-native-share]");
+        if (copy && navigator.clipboard) {
+          copy.hidden = false;
+          copy.addEventListener("click", function () { navigator.clipboard.writeText(url).then(function () { say("Link copied"); }, function () { say("Couldn't copy. Select the address bar instead."); }); });
+        }
+        if (nat && navigator.share) {
+          nat.hidden = false;
+          nat.addEventListener("click", function () { navigator.share({ title: text, text: text, url: url }).catch(function () {}); });
+        }
+      });
+    },
     status: function (el, text, cls) { el.textContent = text; el.className = "status " + (cls || ""); },
     // Advent door markup, same look as /advent/. e = published entry or null.
     door: function (n, e, today, base) {
@@ -99,4 +120,5 @@
       });
     }
   };
+  L.wireShare();
 })();

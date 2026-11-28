@@ -198,6 +198,15 @@ def build_feed(posts):
 <rss version="2.0"><channel><title>30 Products in 30 Days</title><link>{SITE}/blog/</link><description>One launch and one post every day from 28 November 2026.</description><language>en-AU</language>{items}</channel></rss>
 """, encoding="utf-8")
 
+def build_sitemap(posts):
+    """Static pages plus every published blog post. Participant pages are listed in /sitemap-participants.xml (served by the Worker)."""
+    pages = [("/", None), ("/blog/", None), ("/advent/", None), ("/community/", None), ("/register.html", None)]
+    pages += [(f"/blog/{p['slug']}/", p["date"]) for p in posts]
+    urls = "".join(f"<url><loc>{SITE}{loc}</loc>" + (f"<lastmod>{d}</lastmod>" if d else "") + "</url>" for loc, d in pages)
+    (ROOT.parent / "sitemap.xml").write_text(f"""<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{urls}</urlset>
+""", encoding="utf-8")
+
 
 START = dt.date(2026, 11, 28)  # Day 1
 
@@ -320,7 +329,7 @@ def main():
     for d in ROOT.iterdir():  # drop pages for posts that were unpublished
         if d.is_dir() and d.name.startswith("day-") and d.name not in live: shutil.rmtree(d)
     for p in posts: build_post(p)
-    build_index(posts); build_feed(posts); build_advent(posts)
+    build_index(posts); build_feed(posts); build_advent(posts); build_sitemap(posts)
     print(f"built {len(posts)} post(s)")
 
 if __name__ == "__main__": main()

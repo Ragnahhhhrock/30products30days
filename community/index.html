@@ -48,9 +48,11 @@ gtag('config','G-FM1RLPT7RK');
     if (!r.ok) { ul.innerHTML = '<li class="nodata">Couldn\'t load the community. Refresh to try again.</li>'; return; }
     var list = r.data.participants;
     if (!list.length) { ul.innerHTML = '<li class="nodata"><strong>Calendars appear here as participants set up their profiles.</strong> Day 1 is 28 November 2026.</li>'; return; }
+    L30.publicPages().then(function (live) {
     ul.innerHTML = list.map(function (p) {
-      return '<li><a class="person" href="/calendar/?u=' + encodeURIComponent(p.username) + '"><h2>' + L30.esc(p.display_name) + "</h2><p>" + p.shipped + " of 30 shipped</p></a></li>";
+      return '<li><a class="person" href="' + (live ? "/u/" + encodeURIComponent(p.username) + "/advent/" : "/calendar/?u=" + encodeURIComponent(p.username)) + '"><h2>' + L30.esc(p.display_name) + "</h2><p>" + p.shipped + " of 30 shipped</p></a></li>";
     }).join("");
+    });
   });
 })();
 </script>

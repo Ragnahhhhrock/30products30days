@@ -71,6 +71,7 @@ gtag('config','G-FM1RLPT7RK');
         </div>
         <ul class="days" id="days" aria-label="Pick a day"></ul>
         <div class="row">
+          <a class="l30-btn l30-btn--secondary" id="viewBlog" href="#" hidden>View my public blog</a>
           <a class="l30-btn l30-btn--secondary" id="viewCal" href="#">View my public calendar</a>
           <button type="button" class="l30-btn l30-btn--secondary" id="editProfile">Edit profile</button>
           <a class="l30-btn l30-btn--secondary" href="/admin/" id="adminLink" hidden>Admin</a>
@@ -223,7 +224,13 @@ gtag('config','G-FM1RLPT7RK');
       if (!state.me.username) { $("lead").textContent = "Pick your name and calendar address to get started."; fillProfile(); return show("profilePanel"); }
       $("lead").textContent = "Publish one product post a day. Each one opens a door on your own advent calendar.";
       $("dashHead").textContent = state.me.display_name;
-      $("viewCal").href = "/calendar/?u=" + encodeURIComponent(state.me.username);
+      var un = encodeURIComponent(state.me.username);
+      $("viewCal").href = "/calendar/?u=" + un;
+      L30.publicPages().then(function (live) {
+        if (!live) return;
+        $("viewCal").href = "/u/" + un + "/advent/";
+        $("viewBlog").href = "/u/" + un + "/"; $("viewBlog").hidden = false;
+      });
       $("adminLink").hidden = !state.me.is_admin;
       state.day = Math.min(30, Math.max(1, state.today));
       renderDays(); fillEntry(); show("dash");

@@ -1,6 +1,6 @@
 # Participants API
 
-Powers `/account/`, `/calendar/?u=<username>`, `/community/` and `/admin/`. Approved registrants sign in with an emailed one-time link, publish one product post a day, and each gets their own advent calendar. Doors open only when the day's date has arrived (Perth time), and the API never returns future posts.
+Powers `/account/`, the public pages `/u/<username>/` (blog), `/u/<username>/advent/` and `/u/<username>/day-NN/`, `/calendar/?u=<username>` (redirects to `/u/` once live), `/community/` and `/admin/`. Approved registrants sign in with an emailed one-time link, publish one product post a day, and each gets their own advent calendar. Doors open only when the day's date has arrived (Perth time), and the API never returns future posts.
 
 ## Deploy (one time)
 1. `cd worker/participants && npx wrangler d1 create 30p30d-participants`, paste the `database_id` into `wrangler.toml`.
@@ -16,3 +16,8 @@ Powers `/account/`, `/calendar/?u=<username>`, `/community/` and `/admin/`. Appr
 - Link tokens are single use, expire in 15 minutes, and live in the URL fragment. Sessions last 30 days and are stored hashed.
 - Entries: drafts, publish ahead (stays hidden until its date), edits until 4 Jan 2027. Organisers can hide a post or suspend a participant.
 - Post text is stored as plain markdown and escaped on render; links must be https.
+
+## Public pages (indexable)
+`pages.js` renders each participant's blog, advent calendar and posts as plain HTML (own title, description, canonical, Open Graph and JSON-LD, plus share buttons for X, Facebook, LinkedIn, Reddit, WhatsApp, email and copy link). `/sitemap-participants.xml` lists them and `robots.txt` points to it. A page with no opened posts is `noindex` until the first one opens.
+- Deploy the Worker **first** (`npx wrangler deploy`): `wrangler.toml` routes `30products30days.com/u/*` and the sitemap to it, which needs the domain proxied through Cloudflare. Until then the site keeps using `/calendar/?u=`; the pages switch to `/u/` links by themselves once `/u/` answers.
+- Responses are cached for 5 minutes.

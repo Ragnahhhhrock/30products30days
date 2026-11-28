@@ -2,6 +2,13 @@ name = "30p30d-participants"
 main = "index.js"
 compatibility_date = "2026-11-01"
 
+# Public participant pages and sitemap are served from the main domain (needs the domain proxied through Cloudflare).
+routes = [
+  { pattern = "30products30days.com/u/*", zone_name = "30products30days.com" },
+  { pattern = "www.30products30days.com/u/*", zone_name = "30products30days.com" },
+  { pattern = "30products30days.com/sitemap-participants.xml", zone_name = "30products30days.com" },
+]
+
 # Cloudflare Email Service sending binding (domain 30products30days.com must be onboarded for sending; needs Workers Paid for arbitrary recipients).
 send_email = [{ name = "EMAIL" }]
 

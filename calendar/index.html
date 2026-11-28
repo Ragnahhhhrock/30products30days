@@ -14,6 +14,7 @@ gtag('config','G-FM1RLPT7RK');
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Advent calendar | 30 Products in 30 Days</title>
 <meta name="description" content="A participant's 30 Products in 30 Days advent calendar.">
+<meta name="robots" content="noindex, follow">
 
 <meta name="theme-color" content="#FFD21F">
 <link rel="canonical" href="https://30products30days.com/calendar/">
@@ -48,6 +49,12 @@ gtag('config','G-FM1RLPT7RK');
   L30.nav("community");
   function setText(id, t) { document.getElementById(id).textContent = t; }
   if (!/^[a-z0-9-]{3,24}$/.test(u)) { setText("lead", "Pick someone from the community."); main.innerHTML = '<div class="nodata"><a class="l30-btn l30-btn--primary" href="/community/">See the community</a></div>'; return; }
+  // Each calendar now has its own indexable address; send visitors there once those pages are live.
+  L30.publicPages().then(function (ok) {
+    if (ok) { location.replace("/u/" + u + "/" + (dayQ >= 1 && dayQ <= 30 ? "day-" + (dayQ < 10 ? "0" : "") + dayQ + "/" : "advent/")); return; }
+    render();
+  });
+  function render() {
   L30.api("/api/public/u/" + u).then(function (r) {
     if (r.status === 404) { setText("lead", "We couldn't find that calendar."); main.innerHTML = '<div class="nodata"><a class="l30-btn l30-btn--primary" href="/community/">See the community</a></div>'; return; }
     if (!r.ok) { setText("lead", "Couldn't load this calendar. Refresh to try again."); return; }
@@ -77,6 +84,7 @@ gtag('config','G-FM1RLPT7RK');
     main.innerHTML = '<ol class="doors" aria-label="Advent calendar">' + doors + "</ol>";
     L30.wireDoors(u);
   });
+  }
 })();
 </script>
 </body>

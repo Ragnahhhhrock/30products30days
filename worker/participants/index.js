@@ -12,6 +12,9 @@ const EMAIL_RE = /^[^@\s]{1,64}@[^@\s]+\.[^@\s]{2,}$/;
 const USER_RE = /^[a-z0-9][a-z0-9-]{2,23}$/;
 const RESERVED = new Set(["admin", "api", "account", "calendar", "community", "blog", "advent", "register", "contact", "support", "help"]);
 
+import { handlePublic } from "./pages.js";
+
+const API_ORIGIN = "https://30p30d-participants.malgordonperth.workers.dev";   // serves /api/img for og:image
 const enc = new TextEncoder();
 const nowSec = () => Math.floor(Date.now() / 1000);
 const perthDate = () => new Intl.DateTimeFormat("en-CA", { timeZone: "Australia/Perth" }).format(new Date()); // YYYY-MM-DD
@@ -100,6 +103,11 @@ async function readJson(request) { try { return await request.json(); } catch { 
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+    // Public HTML pages (/u/<username>/...) and their sitemap are for browsers and crawlers: no Origin check.
+    if (url.pathname === "/u" || url.pathname.startsWith("/u/") || url.pathname === "/sitemap-participants.xml") {
+      try { return await handlePublic(request, env, { site: SITE, api: API_ORIGIN, start: START, today: todayDay() }); }
+      catch (err) { return new Response("Server error", { status: 500, headers: { "Cache-Control": "no-store" } }); }
+    }
     const origin = request.headers.get("Origin") || "";
     const isImg = url.pathname.startsWith("/api/img/");
     if (request.method === "OPTIONS") return ORIGINS.includes(origin) ? new Response(null, { status: 204, headers: cors(origin) }) : new Response("Forbidden", { status: 403 });
