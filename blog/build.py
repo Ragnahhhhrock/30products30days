@@ -323,13 +323,20 @@ def build_advent(posts):
                  "/advent/", hero, main, extra_css=ADVENT_CSS, script=ADVENT_JS, wide=True, current="advent")
     (out / "index.html").write_text(html_.replace('og:type" content="article"', 'og:type" content="website"'), encoding="utf-8")
 
+def update_home_count(posts):
+    n = sum(1 for p in posts if p["day"] >= 1)
+    h = ROOT.parent / "index.html"
+    s = h.read_text(encoding="utf-8")
+    s = re.sub(r"<!--launched-->.*?<!--/launched-->", f"<!--launched-->{n}<!--/launched-->", s)
+    h.write_text(s, encoding="utf-8")
+
 def main():
     posts = sorted((parse(f) for f in (ROOT / "posts").glob("*.md")), key=lambda p: p["day"], reverse=True)
     live = {p["slug"] for p in posts}
     for d in ROOT.iterdir():  # drop pages for posts that were unpublished
         if d.is_dir() and d.name.startswith("day-") and d.name not in live: shutil.rmtree(d)
     for p in posts: build_post(p)
-    build_index(posts); build_feed(posts); build_advent(posts); build_sitemap(posts)
+    build_index(posts); build_feed(posts); build_advent(posts); build_sitemap(posts); update_home_count(posts)
     print(f"built {len(posts)} post(s)")
 
 if __name__ == "__main__": main()

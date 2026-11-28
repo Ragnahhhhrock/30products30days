@@ -8,7 +8,7 @@ Only files in `blog/posts/` are built, so only those go live. Drafts live on the
 1. Bring the draft over: `git checkout blog-drafts -- blog/drafts/day-07-name.md && git mv blog/drafts/day-07-name.md blog/posts/` (or copy it into `blog/posts/`).
 2. Fill the front matter `price` and `link`, and replace every `{{placeholder}}`. The build refuses a post that still has one.
 3. `python3 blog/build.py`
-4. Commit `blog/` to `main` and push.
+4. Commit `blog/` and `index.html` to `main` and push. (The build also updates the "products launched" count on the homepage; day number and days remaining update automatically.)
 
 ## Post format
 ```
