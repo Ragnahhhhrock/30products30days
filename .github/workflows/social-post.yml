@@ -1,7 +1,7 @@
 name: Post launch to social
 
 # When a launch blog post lands on main, render the square image, then post it
-# to the 30products30days Instagram account and Facebook page.
+# to the 30products30days Instagram account and Facebook page, then Malcolm's LinkedIn.
 # Posts through Buffer (same account as the other autoposters).
 # Needs: secret BUFFER_API_KEY. Channel ids default to the 30products30days Instagram and Facebook
 # channels; override with variables BUFFER_INSTAGRAM_CHANNEL / BUFFER_FACEBOOK_CHANNEL. BUFFER_ORGANIZATION_ID is optional.
@@ -79,7 +79,8 @@ jobs:
         run: |
           while read -r f; do
             [ -z "$f" ] && continue
-            python3 social/render.py "$f"
+            python3 social/render.py "$f"             # square: Instagram, Facebook
+            python3 social/render.py "$f" --linkedin  # landscape: LinkedIn
           done < /tmp/posts.txt
 
       - name: Publish images (Instagram needs a public URL)
@@ -100,6 +101,7 @@ jobs:
           BUFFER_ORGANIZATION_ID: ${{ vars.BUFFER_ORGANIZATION_ID }}
           BUFFER_INSTAGRAM_CHANNEL: ${{ vars.BUFFER_INSTAGRAM_CHANNEL || '6b0a78a18541f09ecbcf5144' }}  # 30products30days Instagram
           BUFFER_FACEBOOK_CHANNEL: ${{ vars.BUFFER_FACEBOOK_CHANNEL || '6b0a790d8541f09ecbcf53dc' }}  # 30 Products in 30 Days Facebook page
+          BUFFER_LINKEDIN_CHANNEL: ${{ vars.BUFFER_LINKEDIN_CHANNEL || '6b0a81258541f09ecbcfb9e9' }}  # Malcolm Gordon LinkedIn profile
           BUFFER_MODE: ${{ vars.BUFFER_MODE }}
           REPO: ${{ github.repository }}
         run: |
@@ -112,6 +114,7 @@ jobs:
             d=$(sed -n 's/^day: *//p' "$f" | head -1)
             img=$(printf 'social/out/day-%02d.png' "$((10#$d))")
             export IMAGE_URL="https://raw.githubusercontent.com/$REPO/$SHA/$img"
+            export IMAGE_URL_LINKEDIN="https://raw.githubusercontent.com/$REPO/$SHA/${img%.png}-linkedin.png"
             flags=""; [ "$DRY_RUN" = "true" ] && flags="--dry-run"
             python3 social/post.py "$f" $flags
           done < /tmp/posts.txt

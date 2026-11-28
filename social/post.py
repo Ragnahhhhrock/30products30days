@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Queue a launch on the 30 Products 30 Days Instagram account and Facebook page through Buffer.
+"""Queue a launch on the 30 Products 30 Days Instagram account, Facebook page and Malcolm's LinkedIn through Buffer.
 
   python3 social/post.py blog/posts/day-07-name.md [--dry-run]
   python3 social/post.py --list-channels
@@ -10,7 +10,9 @@ Env:
   BUFFER_ORGANIZATION_ID          optional; the account's first organisation if unset
   BUFFER_INSTAGRAM_CHANNEL        channel id or name of the 30products30days Instagram channel
   BUFFER_FACEBOOK_CHANNEL         channel id or name of the 30products30days Facebook page channel
-  IMAGE_URL                       public https URL of the square image
+  BUFFER_LINKEDIN_CHANNEL         channel id or name of the LinkedIn profile channel
+  IMAGE_URL                       public https URL of the square image (Instagram, Facebook)
+  IMAGE_URL_LINKEDIN              public https URL of the landscape 1200x628 image (LinkedIn)
   BUFFER_MODE                     addToQueue (default, Buffer picks the next slot) or shareNow
 The channel is never guessed: if it is not set or not found, the script lists what Buffer has and stops,
 so a launch can never land on another project's account. State is kept in social/posted.json.
@@ -22,8 +24,9 @@ from launchpost import parse, caption, alt_text
 
 API = os.environ.get("BUFFER_API_URL", "https://api.buffer.com")
 STATE = pathlib.Path(__file__).resolve().parent / "posted.json"
-# Launch order: blog post, advent calendar entry, then Instagram, then Facebook. A failure stops the run, so Facebook never goes before Instagram.
-PLATFORMS = (("instagram", "BUFFER_INSTAGRAM_CHANNEL"), ("facebook", "BUFFER_FACEBOOK_CHANNEL"))
+# Launch order: blog post, advent calendar entry, then Instagram, Facebook, LinkedIn. A failure stops the run, so a later platform never goes before an earlier one.
+PLATFORMS = (("instagram", "BUFFER_INSTAGRAM_CHANNEL"), ("facebook", "BUFFER_FACEBOOK_CHANNEL"),
+             ("linkedin", "BUFFER_LINKEDIN_CHANNEL"))
 
 def q(s):
     return json.dumps(s, ensure_ascii=False)
@@ -63,9 +66,9 @@ def pick(chans, service, want):
 
 def mutation(ch, service, text, image_url, alt, level):
     meta = ""
-    if level == 0:
+    if level == 0:  # LinkedIn needs no platform metadata
         meta = {"instagram": "metadata: { instagram: { type: post, shouldShareToFeed: true } }",
-                "facebook": "metadata: { facebook: { type: post } }"}[service]
+                "facebook": "metadata: { facebook: { type: post } }"}.get(service, "")
     img_meta = f"metadata: {{ altText: {q(alt)} }}" if level <= 1 else ""
     mode = os.environ.get("BUFFER_MODE") or "addToQueue"  # an empty variable counts as unset
     return f"""mutation {{
@@ -124,9 +127,10 @@ def main():
     day = str(meta["day"])
     if meta["day"] < 1:
         print(f"Day {day} is not a launch; skipping."); return
-    image_url = os.environ.get("IMAGE_URL", "")
-    if not image_url.startswith("https://"):
-        sys.exit("IMAGE_URL must be a public https URL")
+    urls = {p: os.environ.get("IMAGE_URL_LINKEDIN" if p == "linkedin" else "IMAGE_URL", "") for p, _ in PLATFORMS}
+    for p, u in urls.items():
+        if not u.startswith("https://"):
+            sys.exit(f"{'IMAGE_URL_LINKEDIN' if p == 'linkedin' else 'IMAGE_URL'} must be a public https URL")
     if not key and not dry:
         sys.exit("BUFFER_API_KEY is not set, so nothing can be posted")
     state = json.loads(STATE.read_text()) if STATE.exists() else {}
@@ -146,11 +150,12 @@ def main():
             show(chans)
             sys.exit(f"Set {var} to the id or exact name of the 30products30days {p} channel.")
         picked[p] = ch
-    if not dry and not wait_live(image_url):
-        sys.exit(f"Image is not live yet: {image_url}")
+    for u in sorted({urls[p] for p, _ in todo}):
+        if not dry and not wait_live(u):
+            sys.exit(f"Image is not live yet: {u}")
     for p, _ in todo:
         print(f"== {p} -> {picked[p]['name']}")
-        pid = create(picked[p], p, meta, image_url, key, dry)
+        pid = create(picked[p], p, meta, urls[p], key, dry)
         if not dry:
             done[p] = pid
             state[day] = done

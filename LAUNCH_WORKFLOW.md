@@ -15,10 +15,10 @@ Follow "Advent calendar entries" in `CLAUDE.md`:
 - Insert it in that day's `.door__inside`, wrapped in a link to the product URL (not the blog post). Set `data-post="1"` on the door.
 - Re-run `python3 blog/build.py` and check the door opens on its date.
 
-## 3. Instagram post, then 4. Facebook post (automatic)
-Order is fixed: blog post, advent entry, Instagram, Facebook. Push the blog post and the advent entry together (or the advent entry first). Pushing the blog post to `main` triggers `.github/workflows/social-post.yml`, which first checks the day's advent entry exists (it stops and posts nothing if not), then:
-- renders the square (1080x1080) image from the post's front matter (`social/render.py`, design-system tokens only);
-- queues it on the 30products30days Instagram account and Facebook page through Buffer (`social/post.py`; Buffer posts at each channel's next slot) with the daily caption:
+## 3. Instagram post, 4. Facebook post, 5. LinkedIn post (automatic)
+Order is fixed: blog post, advent entry, Instagram, Facebook, LinkedIn. Push the blog post and the advent entry together (or the advent entry first). Pushing the blog post to `main` triggers `.github/workflows/social-post.yml`, which first checks the day's advent entry exists (it stops and posts nothing if not), then:
+- renders the images from the post's front matter (`social/render.py`, design-system tokens only): square 1080x1080 for Instagram and Facebook, landscape 1200x628 for LinkedIn;
+- queues it on the 30products30days Instagram account, the Facebook page and Malcolm's personal LinkedIn through Buffer (`social/post.py`; Buffer posts at each channel's next slot) with the daily caption:
   ```
   Day NN of R: Product name.   (R = 30 minus NN, days remaining: Day 01 of 29; Day 30 reads "Day 30: final day")
   One sentence on what it is and who it is for.
@@ -30,11 +30,11 @@ Order is fixed: blog post, advent entry, Instagram, Facebook. Push the blog post
 
 Before pushing, preview the image: `python3 social/render.py blog/posts/day-NN-name.md out.png`. Check the run in the repo's Actions tab after the push. Requires secret `BUFFER_API_KEY` (the channel ids are built into the workflow). Test without posting via the workflow's manual run with `dry_run` on.
 
-## 5. Commit and push
+## 6. Commit and push
 Commit the blog post, advent entry and thumbnail, and push to `main` on this repo. This push triggers the social posts.
 
 ## Checklist
 - [ ] Blog post built, no placeholders
 - [ ] Advent thumbnail + link + `data-post="1"`
-- [ ] Social workflow run succeeded (Instagram + Facebook)
+- [ ] Social workflow run succeeded (Instagram, Facebook, LinkedIn)
 - [ ] Committed and pushed
