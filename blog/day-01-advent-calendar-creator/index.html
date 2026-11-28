@@ -75,10 +75,15 @@ gtag('config','G-FM1RLPT7RK');
   .item p{margin:0;color:var(--ink-muted);font-size:16px}
   .panel{background:var(--surface-card);border:var(--border-w) solid var(--outline);border-radius:var(--radius-lg);box-shadow:var(--shadow-hard-md);padding:var(--space-4)}
   .l30-card{margin-top:var(--space-5)}
+  .share{margin-top:var(--space-5)}
+  .share__list{list-style:none;margin:0;padding:0 4px 4px 0;display:flex;flex-wrap:wrap;gap:var(--space-3)}
+  .share .l30-btn{background:var(--surface-card);color:var(--ink);padding:12px 20px;font-family:var(--font-body)}
+  .share .l30-btn[hidden]{display:none}
+  .share__status{margin:var(--space-2) 0 0;min-height:1.6em;color:var(--ink-muted);font-size:15px}
   footer{margin-top:var(--space-6);padding:var(--space-5) 0;border-top:var(--border-w) solid var(--outline);color:var(--ink-muted);font-size:14px}
   footer .wrap{display:flex;flex-wrap:wrap;align-items:center;gap:var(--space-3)}
   footer img{width:32px;height:32px}
-  @media (prefers-reduced-motion:reduce){.item{transition:none}.item:hover{transform:none}}
+  @media (prefers-reduced-motion:reduce){.item{transition:none}.item:hover{transform:none}.share .l30-btn{transition:none}}
 </style>
 </head>
 <body>
@@ -99,9 +104,24 @@ gtag('config','G-FM1RLPT7RK');
 <article class="l30-card"><header class="l30-card__head"><span class="l30-card__day">Day 01</span><span class="l30-card__type">Digital</span></header>
 <div class="l30-card__body"><h3 class="l30-card__title">Advent calendar creator</h3><p class="l30-card__text">Turn your photos into a 24-door digital advent calendar with snow and stickers.</p>
 <div class="l30-card__foot"><b class="l30-card__price">Free</b><a class="l30-btn l30-btn--primary" href="https://adventcalendarcreator.com" rel="noopener">Grab it</a></div></div></article>
+<section class="share" aria-labelledby="share-h" data-url="https://30products30days.com/blog/day-01-advent-calendar-creator/" data-title="Day 01: Advent calendar creator | 30 Products in 30 Days"><p class="label" id="share-h">Share this post</p><ul class="share__list"><li><a class="l30-btn" href="https://x.com/intent/post?text=Day%2001%3A%20Advent%20calendar%20creator%20%7C%2030%20Products%20in%2030%20Days&amp;url=https%3A%2F%2F30products30days.com%2Fblog%2Fday-01-advent-calendar-creator%2F" aria-label="Share on X (opens in a new tab)" target="_blank" rel="noopener noreferrer">X</a></li><li><a class="l30-btn" href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2F30products30days.com%2Fblog%2Fday-01-advent-calendar-creator%2F" aria-label="Share on Facebook (opens in a new tab)" target="_blank" rel="noopener noreferrer">Facebook</a></li><li><a class="l30-btn" href="https://www.linkedin.com/sharing/share-offsite/?url=https%3A%2F%2F30products30days.com%2Fblog%2Fday-01-advent-calendar-creator%2F" aria-label="Share on LinkedIn (opens in a new tab)" target="_blank" rel="noopener noreferrer">LinkedIn</a></li><li><a class="l30-btn" href="https://wa.me/?text=Day%2001%3A%20Advent%20calendar%20creator%20%7C%2030%20Products%20in%2030%20Days%20https%3A%2F%2F30products30days.com%2Fblog%2Fday-01-advent-calendar-creator%2F" aria-label="Share on WhatsApp (opens in a new tab)" target="_blank" rel="noopener noreferrer">WhatsApp</a></li><li><a class="l30-btn" href="mailto:?subject=Day%2001%3A%20Advent%20calendar%20creator%20%7C%2030%20Products%20in%2030%20Days&amp;body=https%3A%2F%2F30products30days.com%2Fblog%2Fday-01-advent-calendar-creator%2F" aria-label="Share by email">Email</a></li><li><button type="button" class="l30-btn" data-share-copy>Copy link</button></li><li><button type="button" class="l30-btn" data-share-native hidden>Share&hellip;</button></li></ul><p class="share__status" role="status" aria-live="polite"></p></section>
 <div class="actions"><a class="l30-btn l30-btn--secondary" href="/blog/">All posts</a></div>
 </main>
 <footer><div class="wrap"><img src="/brand/logos/launch-badge.svg" alt="" width="32" height="32"><span>&copy; 2026 30products30days.com</span><a href="/">Home</a><a href="/blog/">Blog</a><a href="/advent/">Advent calendar</a></div></footer>
-
+<script>
+(function(){
+  var box=document.querySelector(".share");if(!box)return;
+  var url=box.dataset.url,title=box.dataset.title,st=box.querySelector(".share__status");
+  var native=box.querySelector("[data-share-native]"),copy=box.querySelector("[data-share-copy]");
+  if(navigator.share){native.hidden=false;native.addEventListener("click",function(){navigator.share({title:title,url:url}).catch(function(){})})}
+  copy.addEventListener("click",function(){
+    function ok(){st.textContent="Link copied."}
+    function fail(){st.textContent="Copy failed. The link is "+url}
+    function legacy(){var t=document.createElement("textarea");t.value=url;t.style.position="fixed";t.style.opacity="0";document.body.appendChild(t);t.select();
+      var r=false;try{r=document.execCommand("copy")}catch(e){}document.body.removeChild(t);r?ok():fail()}
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(url).then(ok,legacy)}else{legacy()}
+  });
+})();
+</script>
 </body>
 </html>

@@ -10,6 +10,7 @@ Front matter (between --- lines):
 A post with an empty link, empty price or any {{placeholder}} is refused.
 """
 import datetime as dt, html, pathlib, re, shutil, sys
+from urllib.parse import quote
 from email.utils import format_datetime
 
 ROOT = pathlib.Path(__file__).resolve().parent
@@ -109,10 +110,15 @@ CSS = """
   .item p{margin:0;color:var(--ink-muted);font-size:16px}
   .panel{background:var(--surface-card);border:var(--border-w) solid var(--outline);border-radius:var(--radius-lg);box-shadow:var(--shadow-hard-md);padding:var(--space-4)}
   .l30-card{margin-top:var(--space-5)}
+  .share{margin-top:var(--space-5)}
+  .share__list{list-style:none;margin:0;padding:0 4px 4px 0;display:flex;flex-wrap:wrap;gap:var(--space-3)}
+  .share .l30-btn{background:var(--surface-card);color:var(--ink);padding:12px 20px;font-family:var(--font-body)}
+  .share .l30-btn[hidden]{display:none}
+  .share__status{margin:var(--space-2) 0 0;min-height:1.6em;color:var(--ink-muted);font-size:15px}
   footer{margin-top:var(--space-6);padding:var(--space-5) 0;border-top:var(--border-w) solid var(--outline);color:var(--ink-muted);font-size:14px}
   footer .wrap{display:flex;flex-wrap:wrap;align-items:center;gap:var(--space-3)}
   footer img{width:32px;height:32px}
-  @media (prefers-reduced-motion:reduce){.item{transition:none}.item:hover{transform:none}}
+  @media (prefers-reduced-motion:reduce){.item{transition:none}.item:hover{transform:none}.share .l30-btn{transition:none}}
 """
 
 NAV_ITEMS = [('home', '/', 'Home'), ('blog', '/blog/', 'Blog'), ('advent', '/advent/', 'Advent calendar'), ('community', '/community/', 'Community'), ('account', '/account/', 'My account'), ('join', '/register.html', 'Join'), ('contact', '/#cf', 'Contact')]
@@ -167,6 +173,43 @@ gtag('config','G-FM1RLPT7RK');
 </html>
 """
 
+SHARE_JS = """<script>
+(function(){
+  var box=document.querySelector(".share");if(!box)return;
+  var url=box.dataset.url,title=box.dataset.title,st=box.querySelector(".share__status");
+  var native=box.querySelector("[data-share-native]"),copy=box.querySelector("[data-share-copy]");
+  if(navigator.share){native.hidden=false;native.addEventListener("click",function(){navigator.share({title:title,url:url}).catch(function(){})})}
+  copy.addEventListener("click",function(){
+    function ok(){st.textContent="Link copied."}
+    function fail(){st.textContent="Copy failed. The link is "+url}
+    function legacy(){var t=document.createElement("textarea");t.value=url;t.style.position="fixed";t.style.opacity="0";document.body.appendChild(t);t.select();
+      var r=false;try{r=document.execCommand("copy")}catch(e){}document.body.removeChild(t);r?ok():fail()}
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(url).then(ok,legacy)}else{legacy()}
+  });
+})();
+</script>"""
+
+def share_block(p):
+    """Share links for a post: plain URLs (no third-party scripts), plus Copy link and the native share sheet where supported."""
+    url = f"{SITE}/blog/{p['slug']}/"
+    title = f"Day {p['day']:02d}: {p['title']}" if p["day"] >= 1 else p["title"]
+    text = f"{title} | 30 Products in 30 Days"
+    u, t = quote(url, safe=""), quote(text, safe="")
+    links = [
+        ("X", f"https://x.com/intent/post?text={t}&url={u}", "Share on X"),
+        ("Facebook", f"https://www.facebook.com/sharer/sharer.php?u={u}", "Share on Facebook"),
+        ("LinkedIn", f"https://www.linkedin.com/sharing/share-offsite/?url={u}", "Share on LinkedIn"),
+        ("WhatsApp", f"https://wa.me/?text={quote(text + ' ' + url, safe='')}", "Share on WhatsApp"),
+        ("Email", f"mailto:?subject={t}&body={quote(url, safe='')}", "Share by email"),
+    ]
+    li = "".join(f'<li><a class="l30-btn" href="{E(h)}" aria-label="{E(a)} (opens in a new tab)" target="_blank" rel="noopener noreferrer">{n}</a></li>' if n != "Email"
+                 else f'<li><a class="l30-btn" href="{E(h)}" aria-label="{E(a)}">{n}</a></li>' for n, h, a in links)
+    li += '<li><button type="button" class="l30-btn" data-share-copy>Copy link</button></li>'
+    li += '<li><button type="button" class="l30-btn" data-share-native hidden>Share&hellip;</button></li>'
+    return (f'<section class="share" aria-labelledby="share-h" data-url="{E(url)}" data-title="{E(text)}">'
+            f'<p class="label" id="share-h">Share this post</p><ul class="share__list">{li}</ul>'
+            '<p class="share__status" role="status" aria-live="polite"></p></section>')
+
 def build_post(p):
     n = p["day"]; nice = p["date"].strftime("%-d %B %Y")
     title = f"Day {n:02d}: {p['title']}"
@@ -178,9 +221,9 @@ def build_post(p):
     card = f"""<article class="l30-card"><header class="l30-card__head"><span class="l30-card__day">Day {n:02d}</span><span class="l30-card__type">{E(p['type'])}</span></header>
 <div class="l30-card__body"><h3 class="l30-card__title">{E(p['title'])}</h3><p class="l30-card__text">{E(p['summary'])}</p>
 <div class="l30-card__foot"><b class="l30-card__price">{E(p['price'])}</b><a class="l30-btn l30-btn--primary" href="{E(p['link'])}" rel="noopener">Grab it</a></div></div></article>"""
-    main = f'<div class="post">{md(p["body"])}</div>\n{card}\n<div class="actions"><a class="l30-btn l30-btn--secondary" href="/blog/">All posts</a></div>'
+    main = f'<div class="post">{md(p["body"])}</div>\n{card}\n{share_block(p)}\n<div class="actions"><a class="l30-btn l30-btn--secondary" href="/blog/">All posts</a></div>'
     d = ROOT / p["slug"]; d.mkdir(exist_ok=True)
-    (d / "index.html").write_text(page(f"{title} | 30 Products in 30 Days", p["summary"], f"/blog/{p['slug']}/", hero, main), encoding="utf-8")
+    (d / "index.html").write_text(page(f"{title} | 30 Products in 30 Days", p["summary"], f"/blog/{p['slug']}/", hero, main, script=SHARE_JS), encoding="utf-8")
 
 def build_index(posts):
     hero = """<header class="hero"><div class="wrap"><div class="hero__text"><p class="label">The blog</p>
