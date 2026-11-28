@@ -7,6 +7,11 @@ const EDIT_UNTIL = Date.UTC(2027, 0, 4);         // entries stay editable a week
 const TYPES = ["Digital", "Physical", "Service"];
 const SPAM = /\b(seo|backlinks?|guest post|lead generation|first page of google|casino|forex|loan offer|crypto giveaway)\b/i;
 const USER_RE = /^[a-z0-9][a-z0-9-]{2,23}$/;
+const SOCIAL = {   // profile links: accept a handle or a link, store a clean https link
+  x: { hosts: ["x.com", "twitter.com"], base: "https://x.com/", handle: /^[A-Za-z0-9_]{1,15}$/, name: "X" },
+  instagram: { hosts: ["instagram.com"], base: "https://www.instagram.com/", handle: /^[A-Za-z0-9_.]{1,30}$/, name: "Instagram" },
+  linkedin: { hosts: ["linkedin.com"], base: "https://www.linkedin.com/in/", handle: /^[A-Za-z0-9-]{3,100}$/, name: "LinkedIn" },
+};
 const RESERVED = new Set(["admin", "api", "account", "calendar", "community", "blog", "advent", "register", "contact", "support", "help", "connect", "mcp"]);
 const PROTOCOLS = ["2025-06-18", "2025-03-26", "2024-11-05"];
 
@@ -51,6 +56,8 @@ FIELDS AND LIMITS
 PROFILE
 - username: 3 to 24 lowercase letters, numbers or hyphens. It becomes the public address ${SITE}/u/<username>/.
 - display_name: up to 60 characters. bio: up to 300 characters, optional.
+- profile picture: PNG, JPG or WebP up to 2 MB, optional (upload_profile_picture).
+- website: https link, optional. x, instagram, linkedin: a handle or a link on that site, optional. Shown as buttons on the public pages.
 
 GOOD POST SHAPE
 1. One-sentence opener: what it is and who it is for.
@@ -87,7 +94,29 @@ const entryOut = (me, e) => ({
   day: e.day, opens_on: dayDate(e.day), product_name: e.product_name, pitch: e.pitch, product_url: e.product_url, price: e.price, type: e.type,
   body: e.body, image: imgUrl(e.image_key), status: e.status, hidden_by_organiser: !!e.hidden, public_url: e.status === "published" ? pageUrl(me, e.day) : null,
 });
-const profileOut = (me) => ({ username: me.username, display_name: me.display_name, bio: me.bio, public_url: me.username ? `${SITE}/u/${me.username}/` : null });
+const profileOut = (me) => ({ username: me.username, display_name: me.display_name, bio: me.bio, avatar: imgUrl(me.avatar_key), website: me.website || "", x: me.x_url || "", instagram: me.instagram_url || "", linkedin: me.linkedin_url || "", public_url: me.username ? `${SITE}/u/${me.username}/` : null });
+
+// Returns { v } with the cleaned https link ("" when blank), or { error }.
+function websiteUrl(raw) {
+  const s = oneLine(raw, 300);
+  if (!s) return { v: "" };
+  if (/^[a-z][a-z0-9+.-]*:/i.test(s) && !/^https:\/\//i.test(s)) return { error: "Website must start with https://" };
+  let u; try { u = new URL(/^https:\/\//i.test(s) ? s : "https://" + s); } catch { return { error: "That website link doesn't look right" }; }
+  if (u.protocol !== "https:" || !u.hostname.includes(".") || u.username || u.password) return { error: "That website link doesn't look right" };
+  u.hash = "";
+  return { v: u.href.slice(0, 300) };
+}
+function socialUrl(raw, kind) {
+  const c = SOCIAL[kind], s = oneLine(raw, 300);
+  if (!s) return { v: "" };
+  const h = s.replace(/^@/, "");
+  if (c.handle.test(h)) return { v: c.base + h };
+  let u; try { u = new URL(/^https?:\/\//i.test(s) ? s : "https://" + s); } catch { return { error: `Add your ${c.name} handle or profile link` }; }
+  const host = u.hostname.toLowerCase();
+  if (u.protocol !== "https:" && u.protocol !== "http:") return { error: `Add your ${c.name} handle or profile link` };
+  if (!c.hosts.some((d) => host === d || host.endsWith("." + d)) || u.pathname.length < 2) return { error: `Use your ${c.name} handle or a link on ${c.hosts[0]}` };
+  return { v: `https://${host}${u.pathname.replace(/\/+$/, "")}`.slice(0, 200) };
+}
 
 const dayProp = { type: "integer", minimum: 1, maximum: 30, description: "Challenge day, 1 to 30 (Day 1 = 28 Nov 2026)." };
 const entryProps = {
@@ -102,11 +131,16 @@ const entryProps = {
 const TOOLS = [
   { name: "get_style_guide", description: "Read this first. Returns the voice, field limits and post shape every post and profile must follow.", inputSchema: { type: "object", properties: {} }, annotations: { title: "Get style guide", readOnlyHint: true } },
   { name: "get_challenge_status", description: "Today's challenge day (Perth time) and, for each of the 30 days, whether the registrant has no entry, a draft or a published post.", inputSchema: { type: "object", properties: {} }, annotations: { title: "Challenge status", readOnlyHint: true } },
-  { name: "get_profile", description: "Read the registrant's public profile (username, display name, bio).", inputSchema: { type: "object", properties: {} }, annotations: { title: "Get profile", readOnlyHint: true } },
+  { name: "get_profile", description: "Read the registrant's public profile (username, display name, bio, profile picture, website, X, Instagram and LinkedIn links).", inputSchema: { type: "object", properties: {} }, annotations: { title: "Get profile", readOnlyHint: true } },
   {
     name: "update_profile", description: "Complete or change the registrant's profile. Only the fields you pass change. A username is needed before any entry can be saved.",
-    inputSchema: { type: "object", properties: { username: { type: "string", description: "3 to 24 lowercase letters, numbers or hyphens." }, display_name: { type: "string", maxLength: 60 }, bio: { type: "string", maxLength: 300 } } },
+    inputSchema: { type: "object", properties: { username: { type: "string", description: "3 to 24 lowercase letters, numbers or hyphens." }, display_name: { type: "string", maxLength: 60 }, bio: { type: "string", maxLength: 300 }, website: { type: "string", description: "Personal site, https link. Empty string clears it." }, x: { type: "string", description: "X handle or x.com link. Empty string clears it." }, instagram: { type: "string", description: "Instagram handle or instagram.com link. Empty string clears it." }, linkedin: { type: "string", description: "LinkedIn profile link or handle. Empty string clears it." } } },
     annotations: { title: "Update profile", readOnlyHint: false, destructiveHint: false, idempotentHint: true },
+  },
+  {
+    name: "upload_profile_picture", description: "Set the registrant's profile picture. PNG, JPG or WebP, up to 2 MB, sent as base64. Replaces any earlier picture.",
+    inputSchema: { type: "object", properties: { image_base64: { type: "string", description: "Base64 image data, with or without a data: prefix." } }, required: ["image_base64"] },
+    annotations: { title: "Upload profile picture", readOnlyHint: false, destructiveHint: false, idempotentHint: false },
   },
   { name: "list_entries", description: "List the registrant's entries (all days they have started), with status.", inputSchema: { type: "object", properties: {} }, annotations: { title: "List entries", readOnlyHint: true } },
   { name: "get_entry", description: "Read one day's entry in full.", inputSchema: { type: "object", properties: { day: dayProp }, required: ["day"] }, annotations: { title: "Get entry", readOnlyHint: true } },
@@ -165,12 +199,30 @@ async function callTool(name, a, env, me, spamOk) {
       const username = a.username !== undefined ? clean(a.username, 24).toLowerCase() : me.username;
       const display = a.display_name !== undefined ? oneLine(a.display_name, 60) : me.display_name;
       const bio = a.bio !== undefined ? clean(a.bio, 300) : me.bio;
+      const web = a.website !== undefined ? websiteUrl(a.website) : { v: me.website || "" };
+      if (web.error) return fail(web.error + ".");
+      const soc = {};
+      for (const k of Object.keys(SOCIAL)) { soc[k] = a[k] !== undefined ? socialUrl(a[k], k) : { v: me[k + "_url"] || "" }; if (soc[k].error) return fail(soc[k].error + "."); }
       if (!username || !USER_RE.test(username) || RESERVED.has(username)) return fail("Username must be 3 to 24 lowercase letters, numbers or hyphens, and not a reserved word.");
       if (!display) return fail("Add a display name.");
       const clash = await env.DB.prepare("SELECT id FROM participants WHERE username=? AND id<>?").bind(username, me.id).first();
       if (clash) return fail("That username is taken. Try another.");
-      await env.DB.prepare("UPDATE participants SET username=?, display_name=?, bio=? WHERE id=?").bind(username, display, bio || "", me.id).run();
-      return ok({ result: "Profile saved.", profile: profileOut({ ...me, username, display_name: display, bio }) });
+      await env.DB.prepare("UPDATE participants SET username=?, display_name=?, bio=?, website=?, x_url=?, instagram_url=?, linkedin_url=? WHERE id=?").bind(username, display, bio || "", web.v, soc.x.v, soc.instagram.v, soc.linkedin.v, me.id).run();
+      return ok({ result: "Profile saved.", profile: profileOut({ ...me, username, display_name: display, bio, website: web.v, x_url: soc.x.v, instagram_url: soc.instagram.v, linkedin_url: soc.linkedin.v }) });
+    }
+    case "upload_profile_picture": {
+      const b64 = String(a.image_base64 || "").replace(/^data:[^,]*,/, "").replace(/\s+/g, "");
+      if (!b64 || b64.length > 2_900_000) return fail("Image must be 2 MB or smaller.");
+      let bytes;
+      try { const bin = atob(b64.replace(/-/g, "+").replace(/_/g, "/")); bytes = Uint8Array.from(bin, (c) => c.charCodeAt(0)); } catch { return fail("image_base64 is not valid base64."); }
+      if (bytes.length > 2 * 1024 * 1024) return fail("Image must be 2 MB or smaller.");
+      const kind = sniffImage(bytes);
+      if (!kind) return fail("Use a PNG, JPG or WebP image.");
+      const key = `${me.id}/avatar-${rand().slice(0, 16)}.${kind[0]}`;
+      await env.IMAGES.put(key, bytes, { httpMetadata: { contentType: kind[1] } });
+      if (me.avatar_key) await env.IMAGES.delete(me.avatar_key);
+      await env.DB.prepare("UPDATE participants SET avatar_key=? WHERE id=?").bind(key, me.id).run();
+      return ok({ result: "Profile picture saved.", avatar: imgUrl(key) });
     }
     case "list_entries": {
       const rows = await env.DB.prepare("SELECT * FROM entries WHERE participant_id=? ORDER BY day").bind(me.id).all();
