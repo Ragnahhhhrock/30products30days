@@ -352,6 +352,10 @@ gtag('config','G-FM1RLPT7RK');
     document.getElementById('s').textContent = pad(s%60);
   }
   tick(); setInterval(tick,1000);
+  // Products launched = total across all participants (falls back to the number built into the page).
+  fetch('https://30p30d-participants.malgordonperth.workers.dev/api/public/stats').then(function(r){return r.json()}).then(function(d){
+    if(d && typeof d.launched==='number' && d.launched>0) document.getElementById('plaunched').textContent=d.launched;
+  }).catch(function(){});
 </script>
 <script>
 // Set to a form endpoint that accepts a JSON POST (e.g. Formspree or a Cloudflare Worker).
