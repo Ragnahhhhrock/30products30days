@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-FM1RLPT7RK"></script>
+<script>
+window.dataLayer=window.dataLayer||[];
+function gtag(){dataLayer.push(arguments);}
+gtag('js',new Date());
+gtag('config','G-FM1RLPT7RK');
+</script>
+<script src="/analytics.js" defer></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Day 01: Advent calendar creator | 30 Products in 30 Days</title>
+<meta name="description" content="Turn your photos into a 24-door digital advent calendar with snow and stickers.">
+<meta property="og:title" content="Day 01: Advent calendar creator | 30 Products in 30 Days">
+<meta property="og:description" content="Turn your photos into a 24-door digital advent calendar with snow and stickers.">
+<meta property="og:url" content="https://30products30days.com/blog/day-01-advent-calendar-creator/">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="30 Products in 30 Days">
+<meta property="og:image" content="https://30products30days.com/social/og-image.png">
+<meta property="og:locale" content="en_AU">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@30days30prods">
+<meta name="theme-color" content="#FFD21F">
+<link rel="canonical" href="https://30products30days.com/blog/day-01-advent-calendar-creator/">
+<link rel="alternate" type="application/rss+xml" title="30 Products in 30 Days" href="https://30products30days.com/blog/feed.xml">
+<link rel="stylesheet" href="/design-system/components/bundle.css">
+<link rel="stylesheet" href="/site-nav.css">
+<style>
+  @font-face{font-family:"Bricolage Grotesque";font-weight:800;src:url(/design-system/fonts/BricolageGrotesque-ExtraBold.ttf) format("truetype");font-display:swap}
+  @font-face{font-family:"DM Sans";font-weight:400;src:url(/design-system/fonts/DMSans-Regular.ttf) format("truetype");font-display:swap}
+  @font-face{font-family:"DM Sans";font-weight:500;src:url(/design-system/fonts/DMSans-Medium.ttf) format("truetype");font-display:swap}
+  @font-face{font-family:"DM Sans";font-weight:700;src:url(/design-system/fonts/DMSans-Bold.ttf) format("truetype");font-display:swap}
+  :root{
+    --surface-page:#F2F5FA;--surface-card:#FFFFFF;--ink:#0F1B3D;--ink-muted:#33415F;--outline:#0F1B3D;
+    --brand-launch:#FFD21F;--brand-flamingo:#FF6F91;--brand-orbit:#4B5BFF;--on-orbit:#FFFFFF;
+    --link:#3A49E6;--focus-ring:#3A49E6;--status-shipped:#0F1B3D;--on-status-shipped:#FFFFFF;
+    --font-display:"Bricolage Grotesque","Arial Black",Arial,sans-serif;--font-body:"DM Sans",Arial,sans-serif;
+    --space-1:4px;--space-2:8px;--space-3:16px;--space-4:24px;--space-5:40px;--space-6:64px;
+    --radius-sm:12px;--radius-md:20px;--radius-lg:28px;--radius-pill:999px;
+    --shadow-hard-sm:4px 4px 0 0 #0F1B3D;--shadow-hard-md:8px 8px 0 0 #0F1B3D;--border-w:3px;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{--surface-page:#0B1330;--surface-card:#16234F;--ink:#F2F5FA;--ink-muted:#B9C3DD;--outline:#F2F5FA;
+      --link:#A5AFFF;--focus-ring:#FFD21F;--status-shipped:#F2F5FA;--on-status-shipped:#0F1B3D;
+      --shadow-hard-sm:4px 4px 0 0 #050A1F;--shadow-hard-md:8px 8px 0 0 #050A1F}
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--surface-page);color:var(--ink);font:400 18px/1.6 var(--font-body)}
+  .wrap{max-width:760px;margin:0 auto;padding:0 var(--space-3)}
+  a{color:var(--link)}
+  a:focus-visible{outline:3px solid var(--focus-ring);outline-offset:3px;border-radius:4px}
+  .label{font:700 13px/1.3 var(--font-body);letter-spacing:2px;text-transform:uppercase;margin:0 0 var(--space-2)}
+  .hero{background:var(--brand-launch);color:#0F1B3D;border-bottom:var(--border-w) solid var(--outline)}
+  .hero .wrap{padding-top:var(--space-5);padding-bottom:var(--space-5);display:flex;gap:var(--space-4);align-items:center;flex-wrap:wrap}
+  .hero__text{flex:1 1 360px;min-width:0}
+  h1{font:800 clamp(36px,7vw,60px)/1 var(--font-display);letter-spacing:-.03em;margin:var(--space-2) 0 var(--space-3)}
+  h1 mark{background:var(--brand-flamingo);color:#0F1B3D;padding:0 12px;border-radius:var(--radius-sm);display:inline-block;transform:rotate(-2deg)}
+  .lead{font-size:20px;margin:0}
+  .meta{display:flex;flex-wrap:wrap;gap:var(--space-2);align-items:center;font:700 13px/1.3 var(--font-body);letter-spacing:1px;text-transform:uppercase}
+  .pill{display:inline-flex;background:#FFFFFF;color:#0F1B3D;border:2px solid #0F1B3D;border-radius:var(--radius-pill);padding:4px 12px;font:700 12px/1.2 var(--font-body);letter-spacing:0;text-transform:none}
+  main{padding:var(--space-5) 0 0}
+  h2{font:800 clamp(26px,4vw,32px)/1.1 var(--font-display);letter-spacing:-1px;margin:var(--space-5) 0 var(--space-3)}
+  .post p,.post li{max-width:64ch}
+  .post ul{padding-left:22px}
+  .note{color:var(--ink-muted);font-size:15px}
+  .actions{display:flex;flex-wrap:wrap;gap:var(--space-3);margin:var(--space-5) 0 0}
+  .list{list-style:none;margin:0;padding:0;display:grid;gap:var(--space-4)}
+  .item{display:flex;gap:var(--space-3);align-items:center;background:var(--surface-card);border:var(--border-w) solid var(--outline);border-radius:var(--radius-lg);box-shadow:var(--shadow-hard-md);padding:var(--space-3) var(--space-4);text-decoration:none;color:var(--ink)}
+  .item:hover{transform:translate(2px,2px);box-shadow:6px 6px 0 0 var(--outline)}
+  .item:focus-visible{outline:3px solid var(--focus-ring);outline-offset:3px}
+  .item h2{font:800 24px/1.1 var(--font-display);letter-spacing:-.5px;margin:0 0 4px}
+  .item p{margin:0;color:var(--ink-muted);font-size:16px}
+  .panel{background:var(--surface-card);border:var(--border-w) solid var(--outline);border-radius:var(--radius-lg);box-shadow:var(--shadow-hard-md);padding:var(--space-4)}
+  .l30-card{margin-top:var(--space-5)}
+  footer{margin-top:var(--space-6);padding:var(--space-5) 0;border-top:var(--border-w) solid var(--outline);color:var(--ink-muted);font-size:14px}
+  footer .wrap{display:flex;flex-wrap:wrap;align-items:center;gap:var(--space-3)}
+  footer img{width:32px;height:32px}
+  @media (prefers-reduced-motion:reduce){.item{transition:none}.item:hover{transform:none}}
+</style>
+</head>
+<body>
+<header class="site-nav"><div class="site-nav__in"><a class="site-nav__brand" href="/"><img src="/brand/logos/launch-badge.svg" alt="" width="36" height="36"><span>30 Products 30 Days</span></a><nav aria-label="Main"><ul class="site-nav__list"><li><a class="site-nav__link" href="/">Home</a></li><li><a class="site-nav__link" href="/blog/" aria-current="page">Blog</a></li><li><a class="site-nav__link" href="/advent/">Advent calendar</a></li><li><a class="site-nav__link" href="/community/">Community</a></li><li><a class="site-nav__link" href="/account/">My account</a></li><li><a class="site-nav__link" href="/register.html">Join</a></li><li><a class="site-nav__link" href="/#cf">Contact</a></li></ul></nav></div></header>
+<header class="hero"><div class="wrap">
+  <svg class="l30-badge" width="96" height="96" viewBox="0 0 120 120" role="img" aria-label="Day 01"><circle cx="54" cy="58" r="46" fill="#0F1B3D"/><circle cx="48" cy="52" r="46" fill="#FFD21F" stroke="#0F1B3D" stroke-width="5"/><text x="48" y="68" text-anchor="middle" font-family="var(--font-display)" font-weight="800" font-size="50" letter-spacing="-3" fill="#0F1B3D">01</text><path d="M100 6 L104 18 L116 22 L104 26 L100 38 L96 26 L84 22 L96 18 Z" fill="#FF6F91" stroke="#0F1B3D" stroke-width="3" stroke-linejoin="round"/></svg>
+  <div class="hero__text"><div class="meta"><span class="pill">Digital</span><time datetime="2026-11-28">28 November 2026</time></div>
+  <h1>Day 01: Advent calendar creator</h1><p class="lead">Turn your photos into a 24-door digital advent calendar with snow and stickers.</p></div>
+</div></header>
+<main class="wrap">
+<div class="post"><p>Day 1 is <strong>Advent calendar creator</strong>: a free way to turn your own photos into a digital advent calendar for Christmas 2026. It is for anyone who wants to give someone a calendar that is personal, not a box of chocolate.</p>
+<h2>What it does</h2>
+<ul><li>Pick up to 24 photos from your camera roll, or take new ones.</li><li>Auto-decorate adds a Christmas filter, a frame and stickers to suit each photo, and you can tweak anything.</li><li>Door 1 opens on 1 December and door 24 on Christmas Eve. Doors stay locked until their day.</li><li>Three looks to pick from: Midnight, Hearth and Pop Print.</li></ul>
+<h2>What it costs</h2>
+<p>Free. No sign-up. Your photos stay on your device and nothing is uploaded.</p>
+<p>One thing to know: calendars live on the device that made them for now, so use the same phone or browser each day. Sharing by link is on the list.</p>
+<p><a href="https://adventcalendarcreator.com">Make your calendar</a></p></div>
+<article class="l30-card"><header class="l30-card__head"><span class="l30-card__day">Day 01</span><span class="l30-card__type">Digital</span></header>
+<div class="l30-card__body"><h3 class="l30-card__title">Advent calendar creator</h3><p class="l30-card__text">Turn your photos into a 24-door digital advent calendar with snow and stickers.</p>
+<div class="l30-card__foot"><b class="l30-card__price">Free</b><a class="l30-btn l30-btn--primary" href="https://adventcalendarcreator.com" rel="noopener">Grab it</a></div></div></article>
+<div class="actions"><a class="l30-btn l30-btn--secondary" href="/blog/">All posts</a></div>
+</main>
+<footer><div class="wrap"><img src="/brand/logos/launch-badge.svg" alt="" width="32" height="32"><span>&copy; 2026 30products30days.com</span><a href="/">Home</a><a href="/blog/">Blog</a><a href="/advent/">Advent calendar</a></div></footer>
+
+</body>
+</html>

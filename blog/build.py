@@ -221,6 +221,9 @@ ADVENT_CSS = """
   .door__inside{position:absolute;inset:0;border-radius:17px;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:space-between;gap:var(--space-2);padding:12px;text-align:center}
   .door__inside h2{font:800 clamp(16px,1.6vw,19px)/1.1 var(--font-display);letter-spacing:-.5px;margin:0;overflow-wrap:anywhere}
   .door__type{margin:0}
+  .door__thumb{display:block;flex:1;min-height:0;width:100%;border-radius:var(--radius-sm)}
+  .door__thumb img{display:block;width:100%;height:100%;object-fit:contain}
+  .door__thumb:focus-visible{outline:3px solid var(--focus-ring);outline-offset:3px}
   .door .l30-btn{width:100%;padding:12px 8px}
   .door__cover{all:unset;box-sizing:border-box;position:absolute;inset:0;display:block;cursor:pointer;z-index:2;border-radius:17px}
   .door__cover:focus-visible{outline:3px solid var(--focus-ring);outline-offset:4px}
@@ -294,7 +297,13 @@ def build_advent(posts):
     for n in range(1, 31):
         d = START + dt.timedelta(days=n - 1); label = f"{d.day} {d:%b}"
         p = by_day.get(n); colour = "pink" if n % 2 else "blue"
-        if p:
+        thumb = ROOT.parent / "advent" / "thumbs" / f"day-{n:02d}.svg"
+        if p and thumb.exists():  # CLAUDE.md: thumbnail in the door, clickable to the product (advent/make_thumb.py)
+            inside = (f'<div class="door__inside" inert aria-hidden="true">'
+                      f'<a class="door__thumb" href="{E(p["link"])}" target="_blank" rel="noopener" aria-label="Open Day {n:02d}: {E(p["title"])}">'
+                      f'<img src="/advent/thumbs/day-{n:02d}.svg" alt="Day {n:02d}: {E(p["title"])}" width="310" height="410"></a>'
+                      f'<a class="l30-btn l30-btn--primary" href="/blog/{p["slug"]}/">Read the post</a></div>')
+        elif p:
             inside = (f'<div class="door__inside" inert aria-hidden="true">{badge(n,48)}<h2>{E(p["title"])}</h2>'
                       f'<span class="l30-tag l30-tag--shipped door__type">{E(p["type"])}</span>'
                       f'<a class="l30-btn l30-btn--primary" href="/blog/{p["slug"]}/">Read the post</a></div>')
@@ -308,7 +317,7 @@ def build_advent(posts):
                  f'{half("l",False)}{half("r",True)}</button>')
         doors.append(f'<li class="door door--{colour} door--locked" data-day="{n}" data-date="{d}" data-label="{label}" data-post="{1 if p else 0}">'
                      f'<span class="today-tag" hidden>Today</span>{inside}{cover}</li>')
-    shipped = len(posts)
+    shipped = sum(1 for p in posts if p["day"] >= 1)  # Day 0 is an announcement, not a launch
     hero = f"""<header class="hero hero--advent"><div class="wrap">
 <p class="label">28 Nov to 27 Dec 2026</p>
 <h1>Advent <mark>calendar</mark></h1>
@@ -323,6 +332,28 @@ def build_advent(posts):
                  "/advent/", hero, main, extra_css=ADVENT_CSS, script=ADVENT_JS, wide=True, current="advent")
     (out / "index.html").write_text(html_.replace('og:type" content="article"', 'og:type" content="website"'), encoding="utf-8")
 
+def excerpt(body, limit=200):
+    """First paragraph as plain text, cut at a word boundary."""
+    para = next((x for x in re.split(r"\n\s*\n", body.strip()) if x.strip() and not x.startswith(("#", "-"))), "")
+    t = re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", " ".join(para.split())).replace("**", "").replace("*", "")
+    if len(t) <= limit: return t
+    return t[:limit].rsplit(" ", 1)[0].rstrip(".,;:!?") + "\u2026"
+
+def update_home_latest(posts):
+    """Homepage block: abridged most recent post; the whole card links to it."""
+    if not posts: return
+    p = posts[0]  # posts are sorted newest (highest day) first
+    n = p["day"]; head = f"Day {n:02d}" if n >= 1 else "Announcement"
+    block = (f'<section class="latest" aria-labelledby="latest-h"><p class="label">Latest from the blog</p><h2 id="latest-h">Latest launch</h2>'
+             f'<article class="panel latest__card"><div class="panel__head panel__head--pink"><span>{head}</span><span class="latest__type">{E(p["type"])}</span></div>'
+             f'<div class="panel__body latest__body"><h3>{E(p["title"])}</h3><p>{E(excerpt(p["body"]))}</p>'
+             f'<span class="l30-btn l30-btn--secondary latest__cta" aria-hidden="true">Read the post</span></div>'
+             f'<a class="latest__link" href="/blog/{p["slug"]}/" aria-label="Read the post: {head}: {E(p["title"])}"></a></article></section>')
+    h = ROOT.parent / "index.html"
+    s = h.read_text(encoding="utf-8")
+    s = re.sub(r"<!--latest-->.*?<!--/latest-->", lambda m: f"<!--latest-->{block}<!--/latest-->", s, flags=re.S)
+    h.write_text(s, encoding="utf-8")
+
 def update_home_count(posts):
     n = sum(1 for p in posts if p["day"] >= 1)
     h = ROOT.parent / "index.html"
@@ -336,7 +367,7 @@ def main():
     for d in ROOT.iterdir():  # drop pages for posts that were unpublished
         if d.is_dir() and d.name.startswith("day-") and d.name not in live: shutil.rmtree(d)
     for p in posts: build_post(p)
-    build_index(posts); build_feed(posts); build_advent(posts); build_sitemap(posts); update_home_count(posts)
+    build_index(posts); build_feed(posts); build_advent(posts); build_sitemap(posts); update_home_count(posts); update_home_latest(posts)
     print(f"built {len(posts)} post(s)")
 
 if __name__ == "__main__": main()
